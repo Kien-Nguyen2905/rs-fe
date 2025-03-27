@@ -8,7 +8,18 @@ const api = axios.create({
     import.meta.env.MODE === 'production'
       ? BASE_URL_PRODUCTION
       : BASE_URL_LOCAL,
-  withCredentials: true, // send cookies in every request
+  withCredentials: true, // Ensures cookies are sent with requests
 });
+
+// Add a request interceptor to enforce credentials in all requests
+api.interceptors.request.use(
+  (config) => {
+    config.withCredentials = true;
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
 
 export default api;
