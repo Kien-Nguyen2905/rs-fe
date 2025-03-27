@@ -27,6 +27,10 @@ export function LoginPage() {
     formState: { errors },
   } = useForm({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      taikhoan: '',
+      matkhau: '',
+    },
   });
 
   const onSubmit = async (values) => {
@@ -57,7 +61,7 @@ export function LoginPage() {
           <CardContent className="space-y-4">
             {error && (
               <div className="p-3 text-sm text-red-600 border border-red-200 rounded-md bg-red-50">
-                {error.message}
+                {error.response.data.message || error.message}
               </div>
             )}
 

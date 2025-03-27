@@ -1,4 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { format } from 'date-fns';
 import {
   Card,
   CardContent,
@@ -12,6 +15,14 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import {
   Select,
   SelectContent,
@@ -27,101 +38,109 @@ import {
   CalendarIcon,
   PhoneIcon,
 } from 'lucide-react';
-import { format } from 'date-fns';
 import { useAppContext } from '@/context/AppContext';
+import {
+  updateMeSchema,
+  updateAdminSchema,
+  changePasswordSchema,
+} from '@/schemas/profileSchema';
+import { toast } from 'react-toastify';
+import {
+  useUpdateProfileMutation,
+  useChangePasswordMutation,
+} from '@/queries/useProfile';
 
 export function ProfilePage() {
-  const { user } = useAppContext();
+  const { user, setUser } = useAppContext();
+  const isAdmin = user?.quyen === 0;
 
-  const [personalInfo, setPersonalInfo] = useState({
-    tennv: '',
-    email: '',
-    sdt: '',
-    diachi: '',
-    ngaysinh: '',
-    role: '',
+  const updateProfileMutation = useUpdateProfileMutation();
+  const changePasswordMutation = useChangePasswordMutation();
+
+  // Personal Info Form
+  const profileForm = useForm({
+    resolver: zodResolver(isAdmin ? updateAdminSchema : updateMeSchema),
+    defaultValues: {
+      taikhoan: '',
+      tennv: '',
+      sdt: '',
+      diachi: '',
+      ngaysinh: '',
+      gioitinh: 1,
+      email: '',
+      quyen: 0,
+    },
   });
 
-  const [passwordInfo, setPasswordInfo] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+  // Password Form
+  const passwordForm = useForm({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      matkhaucu: '',
+      matkhaumoi: '',
+    },
   });
 
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [message, setMessage] = useState({ type: '', text: '' });
   useEffect(() => {
     if (user) {
-      setPersonalInfo({
+      profileForm.reset({
+        taikhoan: user.taikhoan || '',
         tennv: user.tennv || '',
-        email: user.email || '',
         sdt: user.sdt || '',
         diachi: user.diachi || '',
         ngaysinh:
-          user?.ngaysinh && !isNaN(new Date(user.ngaysinh).getTime())
+          user.ngaysinh && !isNaN(new Date(user.ngaysinh).getTime())
             ? format(new Date(user.ngaysinh), 'yyyy-MM-dd')
             : '',
-        role: user.quyen === 0 ? 'Admin' : 'Staff',
+        gioitinh: user.gioitinh || 1,
+        email: user.email || '',
+        quyen: user.quyen || 0,
       });
     }
-  }, [user]);
+  }, [user, profileForm]);
 
-  const handlePersonalInfoChange = (e) => {
-    const { name, value } = e.target;
-    setPersonalInfo((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const onProfileSubmit = async (values) => {
+    try {
+      const response = await updateProfileMutation.mutateAsync(values);
 
-  const handlePasswordChange = (e) => {
-    const { name, value } = e.target;
-    setPasswordInfo((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+      if (response && response.code === 200) {
+        toast.success('Profile updated successfully');
 
-  const updatePersonalInfo = (e) => {
-    e.preventDefault();
-    setIsUpdating(true);
-    setMessage({ type: '', text: '' });
-    setTimeout(() => {
-      setMessage({
-        type: 'success',
-        text: 'Profile updated successfully',
-      });
-      setIsUpdating(false);
-    }, 1000);
-  };
-
-  const updatePassword = (e) => {
-    e.preventDefault();
-    setIsUpdating(true);
-    setMessage({ type: '', text: '' });
-
-    if (passwordInfo.newPassword !== passwordInfo.confirmPassword) {
-      setMessage({
-        type: 'error',
-        text: "New passwords don't match",
-      });
-      setIsUpdating(false);
-      return;
+        // Update user in context
+        if (response.data) {
+          setUser(response.data);
+        }
+      } else {
+        toast.error(response?.message || 'Failed to update profile');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error?.response?.data?.message || 'Failed to update profile');
     }
+  };
 
-    // TODO: Implement actual password update API call
-    setTimeout(() => {
-      setMessage({
-        type: 'success',
-        text: 'Password updated successfully',
-      });
-      setPasswordInfo({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      });
-      setIsUpdating(false);
-    }, 1000);
+  const onPasswordSubmit = async (values) => {
+    try {
+      // Check if new password matches confirm password
+      if (values.matkhaumoi !== passwordForm.getValues().confirmPassword) {
+        toast.error("New passwords don't match");
+        return;
+      }
+
+      const response = await changePasswordMutation.mutateAsync(values);
+
+      if (response && response.code === 200) {
+        toast.success('Password updated successfully');
+        passwordForm.reset();
+      } else {
+        toast.error(response?.message || 'Failed to update password');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        error?.response?.data?.message || 'Failed to update password',
+      );
+    }
   };
 
   return (
@@ -197,178 +216,239 @@ export function ProfilePage() {
 
             <TabsContent value="personal" className="space-y-4">
               <Card>
-                <form onSubmit={updatePersonalInfo}>
-                  <CardHeader>
-                    <CardTitle>Personal Information</CardTitle>
-                    <CardDescription>
-                      Update your personal details
-                    </CardDescription>
-                  </CardHeader>
+                <CardHeader>
+                  <CardTitle>Personal Information</CardTitle>
+                  <CardDescription>
+                    Update your personal details
+                  </CardDescription>
+                </CardHeader>
 
-                  <CardContent className="space-y-4">
-                    {message.text && message.type === 'success' && (
-                      <div className="p-3 text-sm text-green-600 border border-green-200 rounded-md bg-green-50">
-                        {message.text}
-                      </div>
-                    )}
-
-                    <div className="space-y-2">
-                      <Label htmlFor="tennv">Full Name</Label>
-                      <Input
-                        id="tennv"
+                <Form {...profileForm}>
+                  <form onSubmit={profileForm.handleSubmit(onProfileSubmit)}>
+                    <CardContent className="space-y-4">
+                      <FormField
+                        control={profileForm.control}
                         name="tennv"
-                        value={personalInfo.tennv}
-                        onChange={handlePersonalInfoChange}
-                        required
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Full Name</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
+                      <FormField
+                        control={profileForm.control}
                         name="email"
-                        type="email"
-                        value={personalInfo.email}
-                        onChange={handlePersonalInfoChange}
-                        required
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                              <Input type="email" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="sdt">Phone Number</Label>
-                      <Input
-                        id="sdt"
+                      <FormField
+                        control={profileForm.control}
                         name="sdt"
-                        value={personalInfo.sdt}
-                        onChange={handlePersonalInfoChange}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Phone Number</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="diachi">Address</Label>
-                      <Input
-                        id="diachi"
+                      <FormField
+                        control={profileForm.control}
                         name="diachi"
-                        value={personalInfo.diachi}
-                        onChange={handlePersonalInfoChange}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Address</FormLabel>
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="ngaysinh">Date of Birth</Label>
-                      <Input
-                        id="ngaysinh"
+                      <FormField
+                        control={profileForm.control}
                         name="ngaysinh"
-                        type="date"
-                        value={personalInfo.ngaysinh}
-                        onChange={handlePersonalInfoChange}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Date of Birth</FormLabel>
+                            <FormControl>
+                              <Input type="date" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="role">Role</Label>
-                      <Select
-                        disabled={user?.quyen !== 0}
-                        name="role"
-                        value={personalInfo.role}
-                        onValueChange={(value) =>
-                          setPersonalInfo((prev) => ({ ...prev, role: value }))
+                      <FormField
+                        control={profileForm.control}
+                        name="gioitinh"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Gender</FormLabel>
+                            <Select
+                              onValueChange={(value) =>
+                                field.onChange(Number(value))
+                              }
+                              defaultValue={String(field.value)}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select gender" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="1">Male</SelectItem>
+                                <SelectItem value="0">Female</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {isAdmin && (
+                        <FormField
+                          control={profileForm.control}
+                          name="quyen"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Role</FormLabel>
+                              <Select
+                                onValueChange={(value) =>
+                                  field.onChange(Number(value))
+                                }
+                                defaultValue={String(field.value)}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select role" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="0">Admin</SelectItem>
+                                  <SelectItem value="1">Staff</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                    </CardContent>
+
+                    <CardFooter>
+                      <Button
+                        type="submit"
+                        disabled={
+                          profileForm.formState.isSubmitting ||
+                          updateProfileMutation.isPending
                         }
                       >
-                        <SelectTrigger id="role">
-                          <SelectValue placeholder="Select role" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Admin">Admin</SelectItem>
-                          <SelectItem value="Staff">Staff</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {user?.quyen !== 0
-                          ? 'Your role cannot be changed. Contact an administrator for role changes.'
-                          : 'You can change roles as an administrator.'}
-                      </p>
-                    </div>
-                  </CardContent>
-
-                  <CardFooter>
-                    <Button type="submit" disabled={isUpdating}>
-                      {isUpdating ? 'Updating...' : 'Save Changes'}
-                    </Button>
-                  </CardFooter>
-                </form>
+                        {profileForm.formState.isSubmitting ||
+                        updateProfileMutation.isPending
+                          ? 'Updating...'
+                          : 'Save Changes'}
+                      </Button>
+                    </CardFooter>
+                  </form>
+                </Form>
               </Card>
             </TabsContent>
 
             <TabsContent value="security" className="space-y-4">
               <Card>
-                <form onSubmit={updatePassword}>
-                  <CardHeader>
-                    <CardTitle>Change Password</CardTitle>
-                    <CardDescription>
-                      Update your password to enhance account security
-                    </CardDescription>
-                  </CardHeader>
+                <CardHeader>
+                  <CardTitle>Change Password</CardTitle>
+                  <CardDescription>
+                    Update your password to enhance account security
+                  </CardDescription>
+                </CardHeader>
 
-                  <CardContent className="space-y-4">
-                    {message.text && (
-                      <div
-                        className={`p-3 text-sm rounded-md ${
-                          message.type === 'error'
-                            ? 'bg-red-50 border border-red-200 text-red-600'
-                            : 'bg-green-50 border border-green-200 text-green-600'
-                        }`}
-                      >
-                        {message.text}
+                <Form {...passwordForm}>
+                  <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}>
+                    <CardContent className="space-y-4">
+                      <FormField
+                        control={passwordForm.control}
+                        name="matkhaucu"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Current Password</FormLabel>
+                            <FormControl>
+                              <Input type="password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={passwordForm.control}
+                        name="matkhaumoi"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>New Password</FormLabel>
+                            <FormControl>
+                              <Input type="password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="space-y-2">
+                        <Label htmlFor="confirmPassword">
+                          Confirm New Password
+                        </Label>
+                        <Input
+                          id="confirmPassword"
+                          type="password"
+                          {...passwordForm.register('confirmPassword')}
+                          required
+                        />
+                        {passwordForm.formState.errors.confirmPassword && (
+                          <p className="text-sm text-destructive">
+                            {
+                              passwordForm.formState.errors.confirmPassword
+                                .message
+                            }
+                          </p>
+                        )}
                       </div>
-                    )}
+                    </CardContent>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="currentPassword">Current Password</Label>
-                      <Input
-                        id="currentPassword"
-                        name="currentPassword"
-                        type="password"
-                        value={passwordInfo.currentPassword}
-                        onChange={handlePasswordChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="newPassword">New Password</Label>
-                      <Input
-                        id="newPassword"
-                        name="newPassword"
-                        type="password"
-                        value={passwordInfo.newPassword}
-                        onChange={handlePasswordChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">
-                        Confirm New Password
-                      </Label>
-                      <Input
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        type="password"
-                        value={passwordInfo.confirmPassword}
-                        onChange={handlePasswordChange}
-                        required
-                      />
-                    </div>
-                  </CardContent>
-
-                  <CardFooter>
-                    <Button type="submit" disabled={isUpdating}>
-                      {isUpdating ? 'Updating...' : 'Change Password'}
-                    </Button>
-                  </CardFooter>
-                </form>
+                    <CardFooter>
+                      <Button
+                        type="submit"
+                        disabled={
+                          passwordForm.formState.isSubmitting ||
+                          changePasswordMutation.isPending
+                        }
+                      >
+                        {passwordForm.formState.isSubmitting ||
+                        changePasswordMutation.isPending
+                          ? 'Updating...'
+                          : 'Change Password'}
+                      </Button>
+                    </CardFooter>
+                  </form>
+                </Form>
               </Card>
             </TabsContent>
           </Tabs>

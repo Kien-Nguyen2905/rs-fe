@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { toast } from 'react-toastify';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
@@ -30,23 +28,10 @@ import {
 } from '@/components/ui/select';
 import { useUpdateStaffMutation } from '@/queries/useStaff';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAppContext } from '@/context/AppContext';
+import { ROLES } from '@/constants/role';
+import { updateStaffSchema } from '@/schemas/staffSchema';
 
-// Form validation schema
-const userSchema = z.object({
-  taikhoan: z.string().min(3, 'Tài khoản phải có ít nhất 3 ký tự'),
-  tennv: z.string().min(2, 'Tên người dùng không được để trống'),
-  sdt: z.string().regex(/^[0-9]{10,11}$/, 'Số điện thoại không hợp lệ'),
-  diachi: z.string().min(5, 'Địa chỉ không được để trống'),
-  ngaysinh: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: 'Ngày sinh không hợp lệ',
-  }),
-  gioitinh: z.coerce.number(),
-  email: z.string().email('Email không hợp lệ'),
-  quyen: z.coerce.number(),
-  matkhau: z.string().optional(),
-});
-
-// Helper to format date from ISO to YYYY-MM-DD for input
 const formatDateForInput = (dateString) => {
   return dateString ? new Date(dateString).toISOString().split('T')[0] : '';
 };
@@ -55,9 +40,12 @@ export function UpdateUserForm({ user, trigger, onSuccess }) {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const updateStaffMutation = useUpdateStaffMutation();
+  const { role } = useAppContext();
+
+  const isAdmin = role !== null && parseInt(role) === ROLES.ADMIN;
 
   const form = useForm({
-    resolver: zodResolver(userSchema),
+    resolver: zodResolver(updateStaffSchema),
     defaultValues: {
       taikhoan: '',
       matkhau: '',
@@ -68,10 +56,10 @@ export function UpdateUserForm({ user, trigger, onSuccess }) {
       gioitinh: 1,
       email: '',
       quyen: 0,
+      trangthai: 1,
     },
   });
 
-  // Update form when user data changes
   useEffect(() => {
     if (user) {
       form.reset({
@@ -84,17 +72,13 @@ export function UpdateUserForm({ user, trigger, onSuccess }) {
         email: user.email || '',
         quyen: user.quyen,
         matkhau: '', // Password field is empty by default when updating
+        trangthai: user.trangthai || 1,
       });
     }
   }, [user, form]);
 
   const onSubmit = async (values) => {
     try {
-      // Remove empty password if not changed
-      if (!values.matkhau) {
-        delete values.matkhau;
-      }
-
       // Add the staff ID for the update call
       const updatedUser = {
         ...values,
@@ -137,7 +121,7 @@ export function UpdateUserForm({ user, trigger, onSuccess }) {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4 py-4"
+            className="py-4 space-y-4"
           >
             <div className="grid grid-cols-2 gap-4">
               <FormField
@@ -147,7 +131,7 @@ export function UpdateUserForm({ user, trigger, onSuccess }) {
                   <FormItem>
                     <FormLabel>Tài khoản</FormLabel>
                     <FormControl>
-                      <Input placeholder="Nhập tài khoản" {...field} disabled />
+                      <Input placeholder="Nhập tài khoản" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -269,37 +253,66 @@ export function UpdateUserForm({ user, trigger, onSuccess }) {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="quyen"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Quyền</FormLabel>
-                    <Select
-                      onValueChange={(value) => field.onChange(parseInt(value))}
-                      value={field.value.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Chọn quyền" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="0">Admin</SelectItem>
-                        <SelectItem value="1">Nhân viên</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {isAdmin && (
+                <FormField
+                  control={form.control}
+                  name="quyen"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quyền</FormLabel>
+                      <Select
+                        onValueChange={(value) =>
+                          field.onChange(parseInt(value))
+                        }
+                        value={field.value.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Chọn quyền" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="0">Admin</SelectItem>
+                          <SelectItem value="1">Nhân viên</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
 
-            <DialogFooter>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Đang cập nhật...' : 'Cập nhật'}
+            <FormField
+              control={form.control}
+              name="trangthai"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Trạng thái</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(parseInt(value))}
+                    value={field.value.toString()}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn trạng thái" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="1">Hoạt động</SelectItem>
+                      <SelectItem value="0">Tạm khóa</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex justify-end">
+              <Button type="submit" disabled={updateStaffMutation.isLoading}>
+                {updateStaffMutation.isLoading ? 'Đang xử lý...' : 'Lưu'}
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         </Form>
       </DialogContent>

@@ -24,7 +24,7 @@ export function UserListPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('desc'); // 'asc' or 'desc'
 
-  const isAdmin = role !== null && parseInt(role) !== ROLES.USER;
+  const isAdmin = role !== null && parseInt(role) !== ROLES.STAFF;
 
   // Toggle sort order
   const toggleSortOrder = () => {

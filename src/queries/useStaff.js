@@ -1,5 +1,5 @@
 import { staff } from '@/api/staff';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export const useStaffListQuery = () => {
   return useQuery({
@@ -17,13 +17,25 @@ export const useStaffDetailQuery = (id) => {
 };
 
 export const useCreateStaffMutation = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: staff.createStaff,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['staffList'],
+      });
+    },
   });
 };
 
 export const useUpdateStaffMutation = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }) => staff.updateStaff(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['staffList'],
+      });
+    },
   });
 };

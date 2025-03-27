@@ -1,14 +1,12 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { toast } from 'react-toastify';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
@@ -29,30 +27,19 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCreateStaffMutation } from '@/queries/useStaff';
-import { useQueryClient } from '@tanstack/react-query';
+import { useAppContext } from '@/context/AppContext';
+import { ROLES } from '@/constants/role';
+import { staffSchema } from '@/schemas/staffSchema';
 
-// Form validation schema
-const userSchema = z.object({
-  taikhoan: z.string().min(3, 'Tài khoản phải có ít nhất 3 ký tự'),
-  matkhau: z.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự'),
-  tennv: z.string().min(2, 'Tên người dùng không được để trống'),
-  sdt: z.string().regex(/^[0-9]{10,11}$/, 'Số điện thoại không hợp lệ'),
-  diachi: z.string().min(5, 'Địa chỉ không được để trống'),
-  ngaysinh: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: 'Ngày sinh không hợp lệ',
-  }),
-  gioitinh: z.coerce.number(),
-  email: z.string().email('Email không hợp lệ'),
-  quyen: z.coerce.number(),
-});
-
-export function CreateUserForm({ trigger, onSuccess }) {
+export function CreateUserForm({ trigger }) {
   const [open, setOpen] = useState(false);
-  const queryClient = useQueryClient();
   const createStaffMutation = useCreateStaffMutation();
+  const { role } = useAppContext();
+
+  const isAdmin = role !== null && parseInt(role) === ROLES.ADMIN;
 
   const form = useForm({
-    resolver: zodResolver(userSchema),
+    resolver: zodResolver(staffSchema),
     defaultValues: {
       taikhoan: '',
       matkhau: '',
@@ -62,7 +49,8 @@ export function CreateUserForm({ trigger, onSuccess }) {
       ngaysinh: '',
       gioitinh: 1,
       email: '',
-      quyen: 0,
+      quyen: isAdmin ? 1 : 0, // Default to STAFF if admin is creating, or ADMIN if super admin
+      trangthai: 1,
     },
   });
 
@@ -74,9 +62,6 @@ export function CreateUserForm({ trigger, onSuccess }) {
         toast.success('Người dùng đã được tạo thành công!');
         form.reset();
         setOpen(false);
-        // Invalidate staff list query to refresh data
-        queryClient.invalidateQueries(['staffList']);
-        if (onSuccess) onSuccess();
       } else {
         toast.error(result.message || 'Có lỗi xảy ra khi tạo người dùng');
       }
@@ -228,37 +213,66 @@ export function CreateUserForm({ trigger, onSuccess }) {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="quyen"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Quyền</FormLabel>
-                    <Select
-                      onValueChange={(value) => field.onChange(parseInt(value))}
-                      value={field.value.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Chọn quyền" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="0">Admin</SelectItem>
-                        <SelectItem value="1">Nhân viên</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {isAdmin && (
+                <FormField
+                  control={form.control}
+                  name="quyen"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quyền</FormLabel>
+                      <Select
+                        onValueChange={(value) =>
+                          field.onChange(parseInt(value))
+                        }
+                        value={field.value.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Chọn quyền" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="0">Admin</SelectItem>
+                          <SelectItem value="1">Nhân viên</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
 
-            <DialogFooter>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Đang tạo...' : 'Tạo người dùng'}
+            <FormField
+              control={form.control}
+              name="trangthai"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Trạng thái</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(parseInt(value))}
+                    value={field.value.toString()}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn trạng thái" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="1">Hoạt động</SelectItem>
+                      <SelectItem value="0">Tạm khóa</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex justify-end">
+              <Button type="submit" disabled={createStaffMutation.isLoading}>
+                {createStaffMutation.isLoading ? 'Đang xử lý...' : 'Lưu'}
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         </Form>
       </DialogContent>

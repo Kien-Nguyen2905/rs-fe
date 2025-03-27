@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { useAppContext } from '@/context/AppContext';
 import { cn } from '@/lib/utils';
-import { useMeQuery } from '@/queries/useAuth';
+import { useMeQuery } from '@/queries/useProfile';
 
 export function Layout() {
   const { isCollapsed, setIsCollapsed, setUser } = useAppContext();
