@@ -9,7 +9,7 @@ export const auth = {
     return response.data;
   },
   async me() {
-    const response = await api.get('/auth/profile');
+    const response = await api.get('/me');
     return response.data;
   },
 };
