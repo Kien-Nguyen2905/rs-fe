@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const BASE_URL_LOCAL = 'http://localhost:3030';
-const BASE_URL_PRODUCTION = 'http://103.155.161.81:3030';
+const BASE_URL_PRODUCTION = 'https://server-annguyen.site';
 
 const api = axios.create({
   baseURL:
