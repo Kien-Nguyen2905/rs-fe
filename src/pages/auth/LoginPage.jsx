@@ -15,16 +15,18 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { useLoginMutation } from '@/queries/useAuth';
 import { loginSchema } from '@/schemas/authSchema';
+import { handleError } from '@/utils/utils';
 
 export function LoginPage() {
   const navigate = useNavigate();
   const { login, role } = useAppContext();
-  const { mutateAsync: loginMutation, isLoading, error } = useLoginMutation();
+  const { mutateAsync: loginMutation, isLoading } = useLoginMutation();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setError,
   } = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -41,7 +43,7 @@ export function LoginPage() {
         navigate('/profile');
       }
     } catch (err) {
-      console.error(err);
+      handleError({ error: err, setError: setError });
     }
   };
   if (role !== null) {
@@ -59,11 +61,11 @@ export function LoginPage() {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
-            {error && (
+            {/* {error && (
               <div className="p-3 text-sm text-red-600 border border-red-200 rounded-md bg-red-50">
                 {error.response.data.message || error.message}
               </div>
-            )}
+            )} */}
 
             <div className="space-y-2">
               <Label htmlFor="taikhoan">Tài khoản</Label>

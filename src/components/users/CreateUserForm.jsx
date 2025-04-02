@@ -30,6 +30,7 @@ import { useCreateStaffMutation } from '@/queries/useStaff';
 import { useAppContext } from '@/context/AppContext';
 import { ROLES } from '@/constants/role';
 import { staffSchema } from '@/schemas/staffSchema';
+import { handleError } from '@/utils/utils';
 
 export function CreateUserForm({ trigger }) {
   const [open, setOpen] = useState(false);
@@ -66,8 +67,7 @@ export function CreateUserForm({ trigger }) {
         toast.error(result.message || 'Có lỗi xảy ra khi tạo người dùng');
       }
     } catch (error) {
-      console.error('Error creating user:', error);
-      toast.error('Có lỗi xảy ra khi tạo người dùng');
+      handleError({ error: error, setError: form.setError });
     }
   };
 

@@ -1,10 +1,10 @@
 import { staff } from '@/api/staff';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-export const useStaffListQuery = () => {
+export const useStaffListQuery = (params = {}) => {
   return useQuery({
-    queryKey: ['staffList'],
-    queryFn: staff.getStaffList,
+    queryKey: ['staffList', params],
+    queryFn: () => staff.getStaffList(params),
   });
 };
 

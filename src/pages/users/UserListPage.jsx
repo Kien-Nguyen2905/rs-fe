@@ -17,32 +17,57 @@ import { useAppContext } from '@/context/AppContext';
 import { ROLES } from '@/constants/role';
 import { Input } from '@/components/ui/input';
 import { formatCurrency, formatDate, getRoleName } from '@/utils/utils';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
 
 export function UserListPage() {
-  const { data: users, isLoading } = useStaffListQuery();
-  const { role } = useAppContext();
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortOrder, setSortOrder] = useState('desc'); // 'asc' or 'desc'
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortOrder, setSortOrder] = useState('desc');
+  const itemsPerPage = 8;
+  const { role } = useAppContext();
   const isAdmin = role !== null && parseInt(role) !== ROLES.STAFF;
+
+  // Fetch all staff data without pagination params
+  const { data: staffData, isLoading } = useStaffListQuery();
+
+  // Filter staff based on search term
+  const filteredUsers = (staffData?.data || []).filter((user) =>
+    user.tennv.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  // Sort users by revenue
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    if (sortOrder === 'asc') {
+      return a.doanhthu - b.doanhthu;
+    } else {
+      return b.doanhthu - a.doanhthu;
+    }
+  });
+
+  // Calculate pagination
+  const totalItems = sortedUsers.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const paginatedUsers = sortedUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
 
   // Toggle sort order
   const toggleSortOrder = () => {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
   };
 
-  // Filter and sort users
-  const filteredAndSortedUsers = (Array.isArray(users?.data) ? users.data : [])
-    .filter((user) =>
-      user.tennv.toLowerCase().includes(searchTerm.toLowerCase()),
-    )
-    .sort((a, b) => {
-      if (sortOrder === 'asc') {
-        return a.doanhthu - b.doanhthu;
-      } else {
-        return b.doanhthu - a.doanhthu;
-      }
-    });
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -105,7 +130,7 @@ export function UserListPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredAndSortedUsers.map((user) => (
+              {paginatedUsers.map((user) => (
                 <TableRow key={user.nvid}>
                   <TableCell>{user.nvid}</TableCell>
                   <TableCell className="font-medium">{user.tennv}</TableCell>
@@ -125,6 +150,78 @@ export function UserListPage() {
               ))}
             </TableBody>
           </Table>
+
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-4">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() =>
+                        currentPage > 1 && handlePageChange(currentPage - 1)
+                      }
+                      className={
+                        currentPage === 1
+                          ? 'pointer-events-none opacity-50'
+                          : 'cursor-pointer'
+                      }
+                    />
+                  </PaginationItem>
+
+                  {[...Array(totalPages)].map((_, index) => {
+                    const pageNumber = index + 1;
+                    // Show first page, last page, and pages around current page
+                    if (
+                      pageNumber === 1 ||
+                      pageNumber === totalPages ||
+                      (pageNumber >= currentPage - 1 &&
+                        pageNumber <= currentPage + 1)
+                    ) {
+                      return (
+                        <PaginationItem key={pageNumber}>
+                          <PaginationLink
+                            onClick={() => handlePageChange(pageNumber)}
+                            isActive={pageNumber === currentPage}
+                          >
+                            {pageNumber}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    }
+
+                    // Add ellipsis
+                    if (
+                      (pageNumber === 2 && currentPage > 3) ||
+                      (pageNumber === totalPages - 1 &&
+                        currentPage < totalPages - 2)
+                    ) {
+                      return (
+                        <PaginationItem key={pageNumber}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      );
+                    }
+
+                    return null;
+                  })}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() =>
+                        currentPage < totalPages &&
+                        handlePageChange(currentPage + 1)
+                      }
+                      className={
+                        currentPage === totalPages
+                          ? 'pointer-events-none opacity-50'
+                          : 'cursor-pointer'
+                      }
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

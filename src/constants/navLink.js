@@ -1,14 +1,16 @@
 import {
   HomeIcon,
-  UsersIcon,
+  BriefcaseBusiness,
   BuildingIcon,
   FileTextIcon,
-  UserIcon,
+  UserPen,
+  UsersRound,
 } from 'lucide-react';
 export const navLink = [
   // { href: '/dashboard', label: 'Dashboard', icon: HomeIcon },
-  { href: '/staffs', label: 'Staff', icon: UsersIcon },
+  { href: '/staffs', label: 'Staff', icon: BriefcaseBusiness },
+  { href: '/customers', label: 'Customer', icon: UsersRound },
   // { href: '/properties', label: 'Properties', icon: BuildingIcon },
   // { href: '/contracts', label: 'Contracts', icon: FileTextIcon },
-  { href: '/profile', label: 'Profile', icon: UserIcon },
+  { href: '/profile', label: 'Profile', icon: UserPen },
 ];

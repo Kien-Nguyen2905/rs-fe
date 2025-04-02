@@ -11,6 +11,8 @@ import { PropertyFormPage } from '@/pages/properties/PropertyFormPage';
 import { ContractListPage } from '@/pages/contracts/ContractListPage';
 import { ContractDetailPage } from '@/pages/contracts/ContractDetailPage';
 import { ProfilePage } from '@/pages/profile/ProfilePage';
+import CustomerListPage from './pages/customers/CustomerListPage';
+import CustomerDetailPage from './pages/customers/CustomerDetailPage';
 
 const RequireAuth = ({ children }) => {
   const { role } = useAppContext();
@@ -46,6 +48,22 @@ function App() {
             element={
               <RequireAuth>
                 <UserListPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/customers"
+            element={
+              <RequireAuth>
+                <CustomerListPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/customers/:id"
+            element={
+              <RequireAuth>
+                <CustomerDetailPage />
               </RequireAuth>
             }
           />
