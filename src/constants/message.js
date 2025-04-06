@@ -20,7 +20,12 @@ export const CustomerMess = {
 
 export const RealEstateMess = {
   IDTYPE_INVALID: 'Loại BDS không hợp lệ',
+  ID_NOT_EXIST: 'Mã BDS không tồn tại',
   ADDRESS_REQUIRED: 'Địa chỉ không được để trống',
+  STATUS_INVALID: 'Tình trạng không hợp lệ',
+  ASSET_CODE: 'MSQSDD không hợp lệ',
+  ASSET_CODE_EXIST: 'MSQSQD đã tồn tại',
   PRICE_INVALID: 'Giá không hợp lệ',
   SIZE_INVALID: 'Kích thước không hợp lệ',
+  ROSES_INVALID: 'Huê hồng không hợp lệ',
 };

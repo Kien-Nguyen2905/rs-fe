@@ -3,13 +3,9 @@ import { Layout } from '@/components/layout/Layout';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { DashboardPage } from '@/pages/dashboard/DashboardPage';
 import { useAppContext } from '@/context/AppContext';
-
 import { UserListPage } from '@/pages/users/UserListPage';
 import { PropertyListPage } from '@/pages/properties/PropertyListPage';
 import { PropertyDetailPage } from '@/pages/properties/PropertyDetailPage';
-import { PropertyFormPage } from '@/pages/properties/PropertyFormPage';
-import { ContractListPage } from '@/pages/contracts/ContractListPage';
-import { ContractDetailPage } from '@/pages/contracts/ContractDetailPage';
 import { ProfilePage } from '@/pages/profile/ProfilePage';
 import CustomerListPage from './pages/customers/CustomerListPage';
 import CustomerDetailPage from './pages/customers/CustomerDetailPage';
@@ -27,10 +23,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
-
-        {/* Protected routes with layout */}
         <Route element={<Layout />}>
           <Route path="/" element={<Navigate to="/staffs" replace />} />
 
@@ -68,41 +61,24 @@ function App() {
             }
           />
 
-          {/* <Route
+          <Route
             path="/properties"
             element={
               <RequireAuth>
                 <PropertyListPage />
               </RequireAuth>
             }
-          /> */}
+          />
 
-          {/* <Route
+          <Route
             path="/properties/:id"
             element={
               <RequireAuth>
                 <PropertyDetailPage />
               </RequireAuth>
             }
-          /> */}
+          />
 
-          {/* <Route
-            path="/properties/create"
-            element={
-              <RequireAuth>
-                <PropertyFormPage />
-              </RequireAuth>
-            }
-          /> */}
-          {/* 
-          <Route
-            path="/properties/:id/edit"
-            element={
-              <RequireAuth>
-                <PropertyFormPage />
-              </RequireAuth>
-            }
-          /> */}
           {/* 
           <Route
             path="/contracts"
@@ -132,7 +108,6 @@ function App() {
           />
         </Route>
 
-        {/* Fallback route */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useGetCustomerByIdQuery } from '@/queries/useCustomer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -9,6 +9,8 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { formatDate } from '@/utils/utils';
+import { Button } from '@/components/ui/button';
+import { HomeIcon } from 'lucide-react';
 
 const formatCurrency = (value) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -98,11 +100,13 @@ export default function CustomerDetailPage() {
 
   return (
     <div className="container mx-auto my-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Thông tin khách hàng
-        </h1>
-        <p className="text-muted-foreground">Chi tiết thông tin khách hàng</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Thông tin khách hàng
+          </h1>
+          <p className="text-muted-foreground">Chi tiết thông tin khách hàng</p>
+        </div>
       </div>
 
       <Card>
@@ -110,9 +114,9 @@ export default function CustomerDetailPage() {
           <CardTitle>Thông tin cá nhân</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
-              <h3 className="text-lg font-semibold mb-4">Thông tin chung</h3>
+              <h3 className="mb-4 text-lg font-semibold">Thông tin chung</h3>
               <div className="space-y-2">
                 <div className="grid grid-cols-2">
                   <span className="font-medium">Mã KH:</span>
@@ -152,7 +156,7 @@ export default function CustomerDetailPage() {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold mb-4">Thông tin liên hệ</h3>
+              <h3 className="mb-4 text-lg font-semibold">Thông tin liên hệ</h3>
               <div className="space-y-2">
                 <div className="grid grid-cols-2">
                   <span className="font-medium">SĐT:</span>

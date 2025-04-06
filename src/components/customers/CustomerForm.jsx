@@ -253,7 +253,6 @@ export default function CustomerForm({ trigger, onSuccess }) {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="1">Hoạt động</SelectItem>
-                        <SelectItem value="0">Không hoạt động</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
