@@ -230,6 +230,15 @@ export function PropertyListPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead
+                        onClick={() => toggleSortOrder('bdsid')}
+                        className="cursor-pointer"
+                      >
+                        ID{' '}
+                        {sortField === 'bdsid' && (
+                          <ArrowUpDown className="inline w-4 h-4 ml-2" />
+                        )}
+                      </TableHead>
                       <TableHead>Hình ảnh</TableHead>
                       <TableHead
                         onClick={() => toggleSortOrder('masoqsdd')}
@@ -283,6 +292,7 @@ export function PropertyListPage() {
                   <TableBody>
                     {getPaginatedProperties().map((property) => (
                       <TableRow key={property.bdsid}>
+                        <TableCell>{property.bdsid}</TableCell>
                         <TableCell>
                           {property.hinhanh ? (
                             <img

@@ -272,7 +272,7 @@ export function PropertyDetailPage() {
 
           <Card className="mt-4">
             <CardHeader>
-              <CardTitle>Customer Information</CardTitle>
+              <CardTitle>Khách hàng Information</CardTitle>
             </CardHeader>
             <CardContent>
               <CustomerInfo customerId={property.khid} />

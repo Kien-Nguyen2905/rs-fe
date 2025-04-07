@@ -64,12 +64,17 @@ export default function PropertyForm({ trigger, customerId }) {
 
   const handleFileChange = (e) => {
     if (e.target.files) {
-      setFiles(Array.from(e.target.files));
+      let selectedFiles = Array.from(e.target.files);
+      if (selectedFiles.length > 5) {
+        toast.warn('Bạn chỉ có thể tải lên tối đa 5 hình ảnh.');
+        setFiles([]);
+      }
     }
   };
 
   const onSubmit = async (values) => {
     try {
+      setIsSubmitting(true);
       if (files.length === 0) {
         form.setError('hinhanh', {
           type: 'manual',
@@ -374,7 +379,7 @@ export default function PropertyForm({ trigger, customerId }) {
             </div>
 
             <div>
-              <FormLabel>Hình ảnh</FormLabel>
+              <FormLabel>Hình ảnh (tối đa 5 hình)</FormLabel>
               <div
                 className="p-6 mt-1 text-center border border-dashed rounded-md cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900"
                 onClick={() => fileInputRef.current?.click()}
