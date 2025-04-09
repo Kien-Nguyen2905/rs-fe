@@ -1,26 +1,67 @@
+import { AuthMess, StaffMess } from '@/constants/message';
 import { z } from 'zod';
 
-export const staffSchema = z.object({
-  taikhoan: z.string().min(1, 'Tài khoản không được để trống'),
-  matkhau: z.string().min(6, 'Mật khẩu ít nhất 6 ký tự'),
-  tennv: z.string().min(1, 'Tên nhân viên không được để trống'),
-  sdt: z.string().regex(/^0\d{9}$/, 'Số điện thoại không hợp lệ'),
-  diachi: z.string().min(1, 'Địa chỉ không được để trống'),
-  ngaysinh: z.string().date('Ngày sinh không hợp lệ'),
+export const staffSchemaBase = z.object({
+  taikhoan: z.string().min(1, AuthMess.ACCOUNT_REQUIRED),
+
+  matkhau: z.string().min(6, AuthMess.PASSWORD_INVALID),
+
+  tennv: z
+    .string()
+    .min(1, StaffMess.NAME_REQUIRED)
+    .regex(
+      /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂẾưăạảấầẩẫậắằẳẵặẹẻẽềềểếỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s]+$/,
+      StaffMess.NAME_INVALID,
+    ),
+
+  sdt: z.string().regex(/^0\d{9}$/, StaffMess.PHONENUMBER_INVALID),
+
+  diachi: z.string().min(1, StaffMess.ADDRESS_REQUIRED),
+
+  ngaysinh: z
+    .string()
+    .refine((val) => {
+      const isValidFormat = /^\d{4}-\d{2}-\d{2}$/.test(val);
+      if (!isValidFormat) return false;
+
+      const date = new Date(val);
+      return !isNaN(date.getTime());
+    }, StaffMess.BIRTHDAY_INVALID)
+    .refine((val) => {
+      const birthDate = new Date(val);
+      const today = new Date();
+      return birthDate < today;
+    }, StaffMess.BIRTHDAY_INVALID),
+
   gioitinh: z.number().refine((val) => val === 0 || val === 1, {
-    message: 'Giới tính không hợp lệ',
+    message: StaffMess.SEX_REQUIRED,
   }),
-  email: z.string().email('Email không hợp lệ'),
+
+  email: z.string().email(StaffMess.EMAIL_INVALID),
+
   quyen: z.number().refine((val) => val === 0 || val === 1, {
-    message: 'Quyền không hợp lệ',
+    message: StaffMess.ROLE_INVALID,
   }),
+
   trangthai: z
     .number()
     .optional()
     .refine((val) => val === undefined || val === 0 || val === 1, {
-      message: 'Trạng thái không hợp lệ',
+      message: StaffMess.STATUS_INVALID,
     }),
 });
-export const updateStaffSchema = staffSchema.extend({
-  matkhau: staffSchema.shape.matkhau.optional().or(z.literal('')),
+
+// [Admin] Cập nhật thông tin nhân viên
+export const updateAdmin = staffSchemaBase.extend({
+  matkhau: staffSchemaBase.shape.matkhau.optional().or(z.literal('')),
 });
+
+// Cập nhật thông tin cá nhân
+export const updateMe = staffSchemaBase
+  .extend({
+    matkhau: staffSchemaBase.shape.matkhau.optional().or(z.literal('')),
+  })
+  .omit({
+    quyen: true,
+    trangthai: true,
+  });

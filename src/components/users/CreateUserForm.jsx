@@ -29,7 +29,7 @@ import {
 import { useCreateStaffMutation } from '@/queries/useStaff';
 import { useAppContext } from '@/context/AppContext';
 import { ROLES } from '@/constants/role';
-import { staffSchema } from '@/schemas/staffSchema';
+import { staffSchemaBase } from '@/schemas/staffSchema';
 import { handleError } from '@/utils/utils';
 
 export function CreateUserForm({ trigger }) {
@@ -40,7 +40,7 @@ export function CreateUserForm({ trigger }) {
   const isAdmin = role !== null && parseInt(role) === ROLES.ADMIN;
 
   const form = useForm({
-    resolver: zodResolver(staffSchema),
+    resolver: zodResolver(staffSchemaBase),
     defaultValues: {
       taikhoan: '',
       matkhau: '',

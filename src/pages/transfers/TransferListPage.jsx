@@ -118,7 +118,7 @@ const TransferListPage = () => {
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center h-40">
-              Loading...
+              Đang tải...
             </div>
           ) : (
             <>

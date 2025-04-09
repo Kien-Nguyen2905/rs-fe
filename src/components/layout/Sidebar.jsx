@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { useAppContext } from '@/context/AppContext';
 import { navLink } from '@/constants/navLink';
-import { toastError, toastSuccess } from '@/lib/toast';
+import { toastError } from '@/lib/toast';
 import { useLogoutMutation } from '@/queries/useAuth';
 
 export function Sidebar({ isCollapsed, setIsCollapsed }) {
@@ -22,7 +22,6 @@ export function Sidebar({ isCollapsed, setIsCollapsed }) {
   const handleLogout = async () => {
     try {
       await logoutMutation(); // Thực hiện gọi API logout
-      toastSuccess('Logged out successfully');
       logout(); // Xóa token hoặc trạng thái đăng nhập phía client
     } catch (error) {
       toastError(error.message || 'Logout failed');

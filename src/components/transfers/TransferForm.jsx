@@ -39,10 +39,10 @@ export const TransferForm = ({ isOpen, onClose }) => {
     setIsSubmitting(true);
     try {
       await createTransferMutation.mutateAsync(data);
-      toast.success('Transfer contract created successfully');
+      toast.success('Hợp đồng chuyển nhượng đã được tạo thành công');
       onClose();
     } catch (error) {
-      toast.error(error.message || 'Failed to create transfer contract');
+      toast.error(error.message || 'Không thể tạo hợp đồng chuyển nhượng');
     } finally {
       setIsSubmitting(false);
     }
@@ -52,7 +52,7 @@ export const TransferForm = ({ isOpen, onClose }) => {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create Transfer Contract</DialogTitle>
+          <DialogTitle>Tạo hợp đồng chuyển nhượng</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -61,11 +61,11 @@ export const TransferForm = ({ isOpen, onClose }) => {
               name="dcid"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Deposit Contract ID</FormLabel>
+                  <FormLabel>Mã hợp đồng cọc</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter deposit contract ID"
+                      placeholder="Nhập mã hợp đồng cọc"
                       {...field}
                     />
                   </FormControl>
@@ -78,11 +78,11 @@ export const TransferForm = ({ isOpen, onClose }) => {
               name="giatri"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contract Value</FormLabel>
+                  <FormLabel>Giá trị hợp đồng</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter contract value"
+                      placeholder="Nhập giá trị hợp đồng"
                       {...field}
                     />
                   </FormControl>
@@ -100,7 +100,7 @@ export const TransferForm = ({ isOpen, onClose }) => {
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Creating...' : 'Create Transfer'}
+                {isSubmitting ? 'Đang tạo...' : 'Tạo hợp đồng'}
               </Button>
             </DialogFooter>
           </form>

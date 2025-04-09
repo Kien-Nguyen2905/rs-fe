@@ -68,6 +68,8 @@ export default function PropertyForm({ trigger, customerId }) {
       if (selectedFiles.length > 5) {
         toast.warn('Bạn chỉ có thể tải lên tối đa 5 hình ảnh.');
         setFiles([]);
+      } else {
+        setFiles(selectedFiles);
       }
     }
   };

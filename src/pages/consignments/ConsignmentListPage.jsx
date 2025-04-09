@@ -4,7 +4,7 @@ import { useConsignmentListQuery } from '@/queries/useConsignment';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ConsignmentForm } from '@/components/consignments/ConsignmentForm';
-import { Search, ArrowUpDown, User } from 'lucide-react';
+import { ArrowUpDown, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   Table,
@@ -143,7 +143,7 @@ const ConsignmentListPage = () => {
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center h-40">
-              Loading...
+              Đang tải...
             </div>
           ) : (
             <>

@@ -70,21 +70,21 @@ export function UserListPage() {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div>Đang tải...</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Staff</h1>
-          <p className="text-muted-foreground">Manage your staff</p>
+          <h1 className="text-3xl font-bold tracking-tight">Nhân viên</h1>
+          <p className="text-muted-foreground">Quản lý nhân viên</p>
         </div>
         {isAdmin && (
           <CreateUserForm
             trigger={
               <Button>
-                <PlusIcon className="w-4 h-4 mr-2" /> Create staff
+                <PlusIcon className="w-4 h-4 mr-2" /> Thêm nhân viên
               </Button>
             }
           />
@@ -106,7 +106,7 @@ export function UserListPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All staff</CardTitle>
+          <CardTitle>Tất cả nhân viên</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>

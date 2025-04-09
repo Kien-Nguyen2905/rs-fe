@@ -53,20 +53,12 @@ export function LoginPage() {
     <div className="flex items-center justify-center h-screen bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Login</CardTitle>
-          <CardDescription>
-            Enter your credentials to access the admin panel
-          </CardDescription>
+          <CardTitle className="text-2xl font-bold">Đăng nhập</CardTitle>
+          <CardDescription>Trang đăng nhập của admin</CardDescription>
         </CardHeader>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
-            {/* {error && (
-              <div className="p-3 text-sm text-red-600 border border-red-200 rounded-md bg-red-50">
-                {error.response.data.message || error.message}
-              </div>
-            )} */}
-
             <div className="space-y-2">
               <Label htmlFor="taikhoan">Tài khoản</Label>
               <Input

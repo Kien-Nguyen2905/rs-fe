@@ -42,13 +42,12 @@ export const ConsignmentForm = ({ open, onOpenChange, onClose }) => {
     setIsSubmitting(true);
     try {
       await createConsignmentMutation.mutateAsync(data);
-      toast.success('Consignment contract created successfully');
+      toast.success('Hợp đồng bán hàng đã được tạo thành công');
       form.reset();
       onClose();
     } catch (error) {
       toast.error(
-        error.response?.data?.message ||
-          'Failed to create consignment contract',
+        error.response?.data?.message || 'Không thể tạo hợp đồng bán hàng',
       );
     } finally {
       setIsSubmitting(false);
@@ -59,7 +58,7 @@ export const ConsignmentForm = ({ open, onOpenChange, onClose }) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create Consignment Contract</DialogTitle>
+          <DialogTitle>Tạo hợp đồng bán hàng</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -71,11 +70,11 @@ export const ConsignmentForm = ({ open, onOpenChange, onClose }) => {
               name="khid"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Khách hàng ID</FormLabel>
+                  <FormLabel>Mã khách hàng</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter customer ID"
+                      placeholder="Nhập mã khách hàng"
                       {...field}
                       onChange={(e) => field.onChange(e.target.value)}
                     />
@@ -90,11 +89,11 @@ export const ConsignmentForm = ({ open, onOpenChange, onClose }) => {
               name="bdsid"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Property ID</FormLabel>
+                  <FormLabel>Mã bất động sản</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter property ID"
+                      placeholder="Nhập mã bất động sản"
                       {...field}
                       onChange={(e) => field.onChange(e.target.value)}
                     />
@@ -109,11 +108,11 @@ export const ConsignmentForm = ({ open, onOpenChange, onClose }) => {
               name="giatri"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contract Value</FormLabel>
+                  <FormLabel>Giá trị hợp đồng</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter contract value"
+                      placeholder="Nhập giá trị hợp đồng"
                       {...field}
                       onChange={(e) => field.onChange(e.target.value)}
                     />
@@ -128,11 +127,11 @@ export const ConsignmentForm = ({ open, onOpenChange, onClose }) => {
               name="chiphidv"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Service Fee</FormLabel>
+                  <FormLabel>Phí dịch vụ</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter service fee"
+                      placeholder="Nhập phí dịch vụ"
                       {...field}
                       onChange={(e) => field.onChange(e.target.value)}
                     />
@@ -147,7 +146,7 @@ export const ConsignmentForm = ({ open, onOpenChange, onClose }) => {
               name="ngaybatdau"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Start Date</FormLabel>
+                  <FormLabel>Ngày bắt đầu</FormLabel>
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
@@ -161,7 +160,7 @@ export const ConsignmentForm = ({ open, onOpenChange, onClose }) => {
               name="ngayketthuc"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>End Date</FormLabel>
+                  <FormLabel>Ngày kết thúc</FormLabel>
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
@@ -172,10 +171,10 @@ export const ConsignmentForm = ({ open, onOpenChange, onClose }) => {
 
             <div className="flex justify-end space-x-2">
               <Button variant="outline" type="button" onClick={onClose}>
-                Cancel
+                Hủy bỏ
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Creating...' : 'Create'}
+                {isSubmitting ? 'Đang tạo...' : 'Tạo hợp đồng'}
               </Button>
             </div>
           </form>

@@ -8,13 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDate, formatCurrency } from '@/utils/formatters';
 import { realEstateStatus } from '@/constants/enums';
 import { toast } from 'react-toastify';
+import { useTypeEstateQuery } from '@/queries/useEstate';
 
 const ConsignmentDetailPage = () => {
   const { id } = useParams();
   const { data, isLoading } = useConsignmentByIdQuery(id);
   const consignment = data?.data;
   const updateConsignmentMutation = useUpdateConsignmentMutation();
-
+  const { data: estateTypeList } = useTypeEstateQuery();
   const handleCancelConsignment = async () => {
     try {
       await updateConsignmentMutation.mutateAsync({ id });
@@ -25,11 +26,13 @@ const ConsignmentDetailPage = () => {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center p-8">Loading...</div>;
+    return <div className="flex justify-center p-8">Đang tải...</div>;
   }
 
   if (!consignment) {
-    return <div className="flex justify-center p-8">Consignment not found</div>;
+    return (
+      <div className="flex justify-center p-8">Không tìm thấy hợp đồng</div>
+    );
   }
 
   const getStatusText = (status) => {
@@ -68,27 +71,27 @@ const ConsignmentDetailPage = () => {
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="font-medium">Contract ID:</span>
+                <span className="font-medium">Mã hợp đồng:</span>
                 <span>{consignment.kgid}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Value:</span>
+                <span className="font-medium">Giá trị:</span>
                 <span>{formatCurrency(consignment.giatri)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Service Fee:</span>
+                <span className="font-medium">Phí dịch vụ:</span>
                 <span>{formatCurrency(consignment.chiphidv)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Start Date:</span>
+                <span className="font-medium">Ngày bắt đầu:</span>
                 <span>{formatDate(consignment.ngaybatdau)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">End Date:</span>
+                <span className="font-medium">Ngày kết thúc:</span>
                 <span>{formatDate(consignment.ngayketthuc)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Status:</span>
+                <span className="font-medium">Trạng thái:</span>
                 <span>{getStatusText(consignment.trangthai)}</span>
               </div>
             </div>
@@ -106,19 +109,19 @@ const ConsignmentDetailPage = () => {
                 <span>{consignment.khid}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Name:</span>
+                <span className="font-medium">Tên:</span>
                 <span>{consignment.khachhang?.hoten || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Address:</span>
+                <span className="font-medium">Địa chỉ:</span>
                 <span>{consignment.khachhang?.diachi || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">ID Card:</span>
+                <span className="font-medium">CMND:</span>
                 <span>{consignment.khachhang?.cmnd || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Phone:</span>
+                <span className="font-medium">Số điện thoại:</span>
                 <span>{consignment.khachhang?.sdt || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
@@ -137,11 +140,17 @@ const ConsignmentDetailPage = () => {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="font-medium">Property ID:</span>
-                  <span>{consignment.bdsid}</span>
+                  <span className="font-medium">Loại bất động sản:</span>
+                  <span>
+                    {
+                      estateTypeList?.data?.find(
+                        (type) => type.loaiid === consignment.batdongsan.loaiid,
+                      ).tenloai
+                    }
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">Address:</span>
+                  <span className="font-medium">Địa chỉ:</span>
                   <span>
                     {`${consignment.batdongsan?.sonha || ''} ${
                       consignment.batdongsan?.tenduong || ''
@@ -153,40 +162,40 @@ const ConsignmentDetailPage = () => {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">Land Use Certificate:</span>
+                  <span className="font-medium">Mã số QSDD:</span>
                   <span>{consignment.batdongsan?.masoqsdd || 'N/A'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">Area:</span>
+                  <span className="font-medium">Diện tích:</span>
                   <span>{consignment.batdongsan?.dientich} m²</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">Dimensions:</span>
+                  <span className="font-medium">Kích thước:</span>
                   <span>
                     {consignment.batdongsan?.chieudai || 'N/A'} x{' '}
                     {consignment.batdongsan?.chieurong || 'N/A'} m
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">Price:</span>
+                  <span className="font-medium">Giá:</span>
                   <span>{formatCurrency(consignment.batdongsan?.dongia)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">Commission Rate:</span>
+                  <span className="font-medium">Tỷ lệ hoa hồng:</span>
                   <span>{consignment.batdongsan?.huehong}%</span>
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="flex flex-col">
-                  <span className="mb-2 font-medium">Description:</span>
+                  <span className="mb-2 font-medium">Mô tả:</span>
                   <p className="text-sm">
-                    {consignment.batdongsan?.mota || 'No description available'}
+                    {consignment.batdongsan?.mota || 'Không có mô tả'}
                   </p>
                 </div>
                 {consignment.batdongsan?.hinhanh && (
                   <div className="mt-4">
                     <span className="block mb-2 font-medium">
-                      Property Image:
+                      Hình ảnh bất động sản:
                     </span>
                     <img
                       src={consignment.batdongsan.hinhanh}

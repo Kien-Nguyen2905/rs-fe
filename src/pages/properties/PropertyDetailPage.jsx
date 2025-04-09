@@ -4,25 +4,20 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ArrowLeftIcon,
-  PencilIcon,
   HomeIcon,
   MapPinIcon,
-  BedDoubleIcon,
-  BathIcon,
   RulerIcon,
-  DollarSignIcon,
   BarChart,
-  // DimensionsIcon,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useGetCustomerByIdQuery } from '@/queries/useCustomer';
-import { useEstateByIdQuery } from '@/queries/useEstate';
+import { useEstateByIdQuery, useTypeEstateQuery } from '@/queries/useEstate';
 import { realEstateStatus } from '@/constants/enums';
 
 export function PropertyDetailPage() {
   const { id } = useParams();
   const [error, setError] = useState(null);
-
+  const { data: estateTypeList } = useTypeEstateQuery();
   const {
     data: response,
     isLoading: loading,
@@ -33,8 +28,8 @@ export function PropertyDetailPage() {
 
   useEffect(() => {
     if (queryError) {
-      setError('Failed to load property details. Please try again later.');
-      console.error('Error fetching property details:', queryError);
+      setError('Lỗi khi tải thông tin bất động sản. Vui lòng thử lại sau.');
+      console.error('Lỗi khi tải thông tin bất động sản:', queryError);
     }
   }, [queryError]);
 
@@ -77,7 +72,9 @@ export function PropertyDetailPage() {
   };
 
   if (loading) {
-    return <div className="py-8 text-center">Loading property details...</div>;
+    return (
+      <div className="py-8 text-center">Đang tải thông tin bất động sản...</div>
+    );
   }
 
   if (error) {
@@ -85,7 +82,7 @@ export function PropertyDetailPage() {
   }
 
   if (!property) {
-    return <div className="py-8 text-center">Property not found</div>;
+    return <div className="py-8 text-center">Không tìm thấy bất động sản</div>;
   }
 
   // Format the address
@@ -111,21 +108,15 @@ export function PropertyDetailPage() {
             </span>
           </div>
           <h1 className="text-3xl font-bold tracking-tight">
-            Property ID: {property.bdsid}
+            Mã bất động sản: {property.bdsid}
           </h1>
           <div className="flex items-center text-muted-foreground">
             <MapPinIcon className="w-4 h-4 mr-1" />
             {fullAddress}
           </div>
         </div>
-        {/* <Link to={`/properties/${id}/edit`}>
-          <Button>
-            <PencilIcon className="w-4 h-4 mr-2" /> Edit Property
-          </Button>
-        </Link> */}
       </div>
 
-      {/* Main image */}
       <div className="relative overflow-hidden rounded-lg h-80">
         <img
           src={property.hinhanh}
@@ -134,7 +125,6 @@ export function PropertyDetailPage() {
         />
       </div>
 
-      {/* Image gallery if available */}
       {property.dshinhanh && property.dshinhanh.length > 0 && (
         <div className="grid grid-cols-4 gap-2">
           {property.dshinhanh.map((img, index) => (
@@ -152,22 +142,22 @@ export function PropertyDetailPage() {
         <div className="md:col-span-2">
           <Tabs defaultValue="details">
             <TabsList>
-              <TabsTrigger value="details">Details</TabsTrigger>
-              <TabsTrigger value="features">Features</TabsTrigger>
+              <TabsTrigger value="details">Chi tiết</TabsTrigger>
+              <TabsTrigger value="features">Địa chỉ</TabsTrigger>
             </TabsList>
             <TabsContent value="details" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Property Description</CardTitle>
+                  <CardTitle>Mô tả bất động sản</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p>{property.mota || 'No description available.'}</p>
+                  <p>{property.mota || 'Không có mô tả.'}</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Property Details</CardTitle>
+                  <CardTitle>Thông tin bất động sản</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
@@ -175,15 +165,23 @@ export function PropertyDetailPage() {
                       <HomeIcon className="w-5 h-5 mr-2 text-muted-foreground" />
                       <div>
                         <p className="text-sm text-muted-foreground">
-                          Property Type
+                          Loại bất động sản
                         </p>
-                        <p className="font-medium">ID: {property.loaiid}</p>
+                        <p className="font-medium">
+                          {
+                            estateTypeList?.data?.find(
+                              (type) => type.loaiid === property.loaiid,
+                            ).tenloai
+                          }
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center">
                       <RulerIcon className="w-5 h-5 mr-2 text-muted-foreground" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Area</p>
+                        <p className="text-sm text-muted-foreground">
+                          Diện tích
+                        </p>
                         <p className="font-medium">{property.dientich} m²</p>
                       </div>
                     </div>
@@ -191,7 +189,7 @@ export function PropertyDetailPage() {
                       <HomeIcon className="w-5 h-5 mr-2 text-muted-foreground" />
                       <div>
                         <p className="text-sm text-muted-foreground">
-                          Dimensions
+                          Kích thước
                         </p>
                         <p className="font-medium">
                           {property.chieudai} x {property.chieurong} m
@@ -202,7 +200,7 @@ export function PropertyDetailPage() {
                       <BarChart className="w-5 h-5 mr-2 text-muted-foreground" />
                       <div>
                         <p className="text-sm text-muted-foreground">
-                          Commission Rate
+                          Tỷ lệ hoa hồng
                         </p>
                         <p className="font-medium">{property.huehong}%</p>
                       </div>
@@ -213,7 +211,7 @@ export function PropertyDetailPage() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Legal Information</CardTitle>
+                  <CardTitle>Thông tin pháp lý</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="font-medium">{property.masoqsdd}</p>
@@ -223,28 +221,27 @@ export function PropertyDetailPage() {
             <TabsContent value="features">
               <Card>
                 <CardHeader>
-                  <CardTitle>Location Details</CardTitle>
+                  <CardTitle>Địa chỉ</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="grid grid-cols-1 gap-2">
                     <li className="flex items-center">
                       <div className="w-2 h-2 mr-2 rounded-full bg-primary" />
-                      <span className="font-medium">Address:</span>{' '}
+                      <span className="font-medium">Địa chỉ:</span>{' '}
                       {property.sonha}, {property.tenduong}
                     </li>
                     <li className="flex items-center">
                       <div className="w-2 h-2 mr-2 rounded-full bg-primary" />
-                      <span className="font-medium">Ward:</span>{' '}
+                      <span className="font-medium">Phường:</span>{' '}
                       {property.phuong}
                     </li>
                     <li className="flex items-center">
                       <div className="w-2 h-2 mr-2 rounded-full bg-primary" />
-                      <span className="font-medium">District:</span>{' '}
-                      {property.quan}
+                      <span className="font-medium">Quận:</span> {property.quan}
                     </li>
                     <li className="flex items-center">
                       <div className="w-2 h-2 mr-2 rounded-full bg-primary" />
-                      <span className="font-medium">City:</span>{' '}
+                      <span className="font-medium">Thành phố:</span>{' '}
                       {property.thanhpho}
                     </li>
                   </ul>
@@ -257,7 +254,7 @@ export function PropertyDetailPage() {
         <div>
           <Card>
             <CardHeader>
-              <CardTitle>Price</CardTitle>
+              <CardTitle>Giá</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">
@@ -272,7 +269,7 @@ export function PropertyDetailPage() {
 
           <Card className="mt-4">
             <CardHeader>
-              <CardTitle>Khách hàng Information</CardTitle>
+              <CardTitle>Khách hàng</CardTitle>
             </CardHeader>
             <CardContent>
               <CustomerInfo customerId={property.khid} />
@@ -293,7 +290,7 @@ function CustomerInfo({ customerId }) {
   } = useGetCustomerByIdQuery(customerId);
 
   if (isLoading) {
-    return <div className="my-4 text-sm">Loading customer information...</div>;
+    return <div className="my-4 text-sm">Đang tải thông tin khách hàng...</div>;
   }
 
   if (error) {
@@ -308,14 +305,15 @@ function CustomerInfo({ customerId }) {
 
   return (
     <div className="p-3 mt-4 border rounded-md bg-gray-50">
-      <h3 className="mb-2 font-medium">Owner Information</h3>
+      <h3 className="mb-2 font-medium">Thông tin chủ sở hữu</h3>
       <div className="space-y-1 text-sm">
         <p>
-          <span className="font-medium">Name:</span> {customer.hoten}
+          <span className="font-medium">Tên:</span> {customer.hoten}
         </p>
         {customer.sodienthoai && (
           <p>
-            <span className="font-medium">Phone:</span> {customer.sodienthoai}
+            <span className="font-medium">Số điện thoại:</span>{' '}
+            {customer.sodienthoai}
           </p>
         )}
         {customer.email && (
@@ -325,7 +323,7 @@ function CustomerInfo({ customerId }) {
         )}
         {customer.diachi && (
           <p>
-            <span className="font-medium">Address:</span> {customer.diachi}
+            <span className="font-medium">Địa chỉ:</span> {customer.diachi}
           </p>
         )}
       </div>

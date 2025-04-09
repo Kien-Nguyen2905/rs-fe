@@ -40,12 +40,12 @@ export const DepositForm = ({ open, onOpenChange, onClose }) => {
     setIsSubmitting(true);
     try {
       await createDepositMutation.mutateAsync(data);
-      toast.success('Deposit contract created successfully');
+      toast.success('Hợp đồng cọc đã được tạo thành công');
       form.reset();
       onClose();
     } catch (error) {
       toast.error(
-        error.response?.data?.message || 'Failed to create deposit contract',
+        error.response?.data?.message || 'Không thể tạo hợp đồng cọc',
       );
     } finally {
       setIsSubmitting(false);
@@ -56,8 +56,7 @@ export const DepositForm = ({ open, onOpenChange, onClose }) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          {/* Updated Title */}
-          <DialogTitle>Create Deposit Contract</DialogTitle>
+          <DialogTitle>Tạo hợp đồng cọc</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -69,13 +68,12 @@ export const DepositForm = ({ open, onOpenChange, onClose }) => {
               name="khid"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Khách hàng ID</FormLabel>
+                  <FormLabel>Mã khách hàng</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter customer ID"
+                      placeholder="Nhập mã khách hàng"
                       {...field}
-                      // Ensure value is passed correctly for controlled number input
                       onChange={(e) =>
                         field.onChange(
                           e.target.value === '' ? '' : Number(e.target.value),
@@ -93,13 +91,12 @@ export const DepositForm = ({ open, onOpenChange, onClose }) => {
               name="bdsid"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Property ID</FormLabel>
+                  <FormLabel>Mã bất động sản</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter property ID"
+                      placeholder="Nhập mã bất động sản"
                       {...field}
-                      // Ensure value is passed correctly for controlled number input
                       onChange={(e) =>
                         field.onChange(
                           e.target.value === '' ? '' : Number(e.target.value),
@@ -117,13 +114,12 @@ export const DepositForm = ({ open, onOpenChange, onClose }) => {
               name="giatri"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Deposit Value</FormLabel> {/* Updated Label */}
+                  <FormLabel>Giá trị cọc</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter deposit value"
+                      placeholder="Nhập giá trị cọc"
                       {...field}
-                      // Ensure value is passed correctly for controlled number input
                       onChange={(e) =>
                         field.onChange(
                           e.target.value === '' ? '' : Number(e.target.value),
@@ -136,15 +132,12 @@ export const DepositForm = ({ open, onOpenChange, onClose }) => {
               )}
             />
 
-            {/* Removed Service Fee (chiphidv) Field */}
-            {/* Removed Start Date (ngaybatdau) Field */}
-
             <FormField
               control={form.control}
-              name="ngayhethan" // Changed from ngayketthuc
+              name="ngayhethan"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Expiration Date</FormLabel> {/* Updated Label */}
+                  <FormLabel>Ngày hết hạn</FormLabel>
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
@@ -155,10 +148,10 @@ export const DepositForm = ({ open, onOpenChange, onClose }) => {
 
             <div className="flex justify-end space-x-2">
               <Button variant="outline" type="button" onClick={onClose}>
-                Cancel
+                Hủy bỏ
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Creating...' : 'Create'}
+                {isSubmitting ? 'Đang tạo...' : 'Tạo hợp đồng'}
               </Button>
             </div>
           </form>

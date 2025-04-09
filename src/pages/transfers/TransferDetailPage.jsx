@@ -24,11 +24,13 @@ const TransferDetailPage = () => {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center p-8">Loading...</div>;
+    return <div className="flex justify-center p-8">Đang tải...</div>;
   }
 
   if (!transfer) {
-    return <div className="flex justify-center p-8">Transfer not found</div>;
+    return (
+      <div className="flex justify-center p-8">Không tìm thấy hợp đồng</div>
+    );
   }
 
   return (
@@ -52,19 +54,19 @@ const TransferDetailPage = () => {
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="font-medium">Contract ID:</span>
+                <span className="font-medium">Mã hợp đồng:</span>
                 <span>{transfer.cnid}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Value:</span>
+                <span className="font-medium">Giá trị:</span>
                 <span>{formatCurrency(transfer.giatri)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Deposit Amount:</span>
+                <span className="font-medium">Giá trị cọc:</span>
                 <span>{formatCurrency(transfer.hddatcoc.giatri)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Date:</span>
+                <span className="font-medium">Ngày lập hợp đồng:</span>
                 <span>{formatDate(transfer.ngaylap)}</span>
               </div>
             </div>
@@ -78,23 +80,23 @@ const TransferDetailPage = () => {
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between">
-                <span className="font-medium">Khách hàng ID:</span>
+                <span className="font-medium">Mã khách hàng:</span>
                 <span>{transfer.khid}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Name:</span>
+                <span className="font-medium">Tên:</span>
                 <span>{transfer.khachhang?.hoten || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Address:</span>
+                <span className="font-medium">Địa chỉ:</span>
                 <span>{transfer.khachhang?.diachi || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">ID Card:</span>
+                <span className="font-medium">CMND:</span>
                 <span>{transfer.khachhang?.cmnd || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="font-medium">Phone:</span>
+                <span className="font-medium">Số điện thoại:</span>
                 <span>{transfer.khachhang?.sdt || 'N/A'}</span>
               </div>
               <div className="flex justify-between">
@@ -113,11 +115,11 @@ const TransferDetailPage = () => {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="font-medium">Property ID:</span>
+                  <span className="font-medium">Mã bất động sản:</span>
                   <span>{transfer.bdsid}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">Address:</span>
+                  <span className="font-medium">Địa chỉ:</span>
                   <span>
                     {`${transfer.batdongsan?.sonha || ''} ${
                       transfer.batdongsan?.tenduong || ''
@@ -129,7 +131,7 @@ const TransferDetailPage = () => {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">Land Use Certificate:</span>
+                  <span className="font-medium">Mã số QSDD:</span>
                   <span>{transfer.batdongsan?.masoqsdd || 'N/A'}</span>
                 </div>
                 <div className="flex justify-between">
@@ -137,32 +139,32 @@ const TransferDetailPage = () => {
                   <span>{transfer.batdongsan?.dientich} m²</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">Dimensions:</span>
+                  <span className="font-medium">Kích thước:</span>
                   <span>
                     {transfer.batdongsan?.chieudai || 'N/A'} x{' '}
                     {transfer.batdongsan?.chieurong || 'N/A'} m
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">Price:</span>
+                  <span className="font-medium">Giá:</span>
                   <span>{formatCurrency(transfer.batdongsan?.dongia)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium">Commission Rate:</span>
+                  <span className="font-medium">Tỷ lệ hoa hồng:</span>
                   <span>{transfer.batdongsan?.huehong}%</span>
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="flex flex-col">
-                  <span className="mb-2 font-medium">Description:</span>
+                  <span className="mb-2 font-medium">Mô tả:</span>
                   <p className="text-sm">
-                    {transfer.batdongsan?.mota || 'No description available'}
+                    {transfer.batdongsan?.mota || 'Không có mô tả'}
                   </p>
                 </div>
                 {transfer.batdongsan?.hinhanh && (
                   <div className="mt-4">
                     <span className="block mb-2 font-medium">
-                      Property Image:
+                      Hình ảnh bất động sản:
                     </span>
                     <img
                       src={transfer.batdongsan.hinhanh}
@@ -179,27 +181,27 @@ const TransferDetailPage = () => {
         {transfer.hddatcoc && (
           <Card className="md:col-span-2">
             <CardHeader>
-              <CardTitle>Deposit Contract Information</CardTitle>
+              <CardTitle>Thông tin hợp đồng cọc</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="font-medium">Deposit ID:</span>
+                    <span className="font-medium">Mã hợp đồng cọc:</span>
                     <span>{transfer.dcid}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="font-medium">Contract Date:</span>
+                    <span className="font-medium">Ngày lập hợp đồng:</span>
                     <span>{formatDate(transfer.hddatcoc.ngaylaphd)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="font-medium">Amount:</span>
+                    <span className="font-medium">Giá trị:</span>
                     <span>{formatCurrency(transfer.hddatcoc.giatri)}</span>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="font-medium">Status:</span>
+                    <span className="font-medium">Trạng thái:</span>
                     <span>
                       {transfer.hddatcoc.tinhtrang === 0
                         ? 'Active'
@@ -207,7 +209,7 @@ const TransferDetailPage = () => {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="font-medium">Expiry Date:</span>
+                    <span className="font-medium">Ngày hết hạn:</span>
                     <span>{formatDate(transfer.hddatcoc.ngayhethan)}</span>
                   </div>
                 </div>

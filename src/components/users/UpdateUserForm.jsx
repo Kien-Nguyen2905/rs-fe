@@ -30,7 +30,7 @@ import { useUpdateStaffMutation } from '@/queries/useStaff';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAppContext } from '@/context/AppContext';
 import { ROLES } from '@/constants/role';
-import { updateStaffSchema } from '@/schemas/staffSchema';
+import { updateMe } from '@/schemas/staffSchema';
 
 const formatDateForInput = (dateString) => {
   return dateString ? new Date(dateString).toISOString().split('T')[0] : '';
@@ -45,7 +45,7 @@ export function UpdateUserForm({ user, trigger, onSuccess }) {
   const isAdmin = role !== null && parseInt(role) === ROLES.ADMIN;
 
   const form = useForm({
-    resolver: zodResolver(updateStaffSchema),
+    resolver: zodResolver(updateMe),
     defaultValues: {
       taikhoan: '',
       matkhau: '',

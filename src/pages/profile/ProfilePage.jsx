@@ -41,8 +41,8 @@ import {
 import { useAppContext } from '@/context/AppContext';
 import {
   updateMeSchema,
-  updateAdminSchema,
   changePasswordSchema,
+  updateAdminSchema,
 } from '@/schemas/profileSchema';
 import { toast } from 'react-toastify';
 import {
@@ -59,7 +59,7 @@ export function ProfilePage() {
 
   // Personal Info Form
   const profileForm = useForm({
-    resolver: zodResolver(isAdmin ? updateAdminSchema : updateMeSchema),
+    resolver: zodResolver(isAdmin ? updateMeSchema : updateAdminSchema),
     defaultValues: {
       taikhoan: '',
       tennv: '',
@@ -104,18 +104,20 @@ export function ProfilePage() {
       const response = await updateProfileMutation.mutateAsync(values);
 
       if (response && response.code === 200) {
-        toast.success('Profile updated successfully');
+        toast.success('Cập nhật thông tin thành công');
 
         // Update user in context
         if (response.data) {
           setUser(response.data);
         }
       } else {
-        toast.error(response?.message || 'Failed to update profile');
+        toast.error(response?.message || 'Cập nhật thông tin thất bại');
       }
     } catch (error) {
       console.error(error);
-      toast.error(error?.response?.data?.message || 'Failed to update profile');
+      toast.error(
+        error?.response?.data?.message || 'Cập nhật thông tin thất bại',
+      );
     }
   };
 
@@ -123,22 +125,22 @@ export function ProfilePage() {
     try {
       // Check if new password matches confirm password
       if (values.matkhaumoi !== passwordForm.getValues().confirmPassword) {
-        toast.error("New passwords don't match");
+        toast.error('Mật khẩu mới không khớp');
         return;
       }
 
       const response = await changePasswordMutation.mutateAsync(values);
 
       if (response && response.code === 200) {
-        toast.success('Password updated successfully');
+        toast.success('Cập nhật mật khẩu thành công');
         passwordForm.reset();
       } else {
-        toast.error(response?.message || 'Failed to update password');
+        toast.error(response?.message || 'Cập nhật mật khẩu thất bại');
       }
     } catch (error) {
       console.error(error);
       toast.error(
-        error?.response?.data?.message || 'Failed to update password',
+        error?.response?.data?.message || 'Cập nhật mật khẩu thất bại',
       );
     }
   };
@@ -146,10 +148,8 @@ export function ProfilePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
-        <p className="text-muted-foreground">
-          Manage your account settings and preferences
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">Trang cá nhân</h1>
+        <p className="text-muted-foreground">Quản lý thông tin cá nhân</p>
       </div>
 
       <div className="flex flex-col gap-6 md:flex-row">
@@ -167,7 +167,7 @@ export function ProfilePage() {
               </Avatar>
               <CardTitle>{user?.tennv}</CardTitle>
               <CardDescription>
-                {user?.quyen === 0 ? 'Admin' : 'Staff'}
+                {user?.quyen === 0 ? 'Quản trị viên' : 'Nhân viên'}
               </CardDescription>
             </div>
           </CardHeader>
@@ -195,7 +195,7 @@ export function ProfilePage() {
               </div>
               <div className="flex items-center">
                 <ShieldIcon className="w-4 h-4 mr-2 text-muted-foreground" />
-                <span>{user?.quyen === 0 ? 'Admin' : 'Staff'}</span>
+                <span>{user?.quyen === 0 ? 'Quản trị viên' : 'Nhân viên'}</span>
               </div>
             </div>
           </CardContent>
@@ -206,21 +206,19 @@ export function ProfilePage() {
             <TabsList>
               <TabsTrigger value="personal">
                 <UserIcon className="w-4 h-4 mr-2" />
-                Personal Info
+                Thông tin cá nhân
               </TabsTrigger>
               <TabsTrigger value="security">
                 <LockIcon className="w-4 h-4 mr-2" />
-                Security
+                Bảo mật
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="personal" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Personal Information</CardTitle>
-                  <CardDescription>
-                    Update your personal details
-                  </CardDescription>
+                  <CardTitle>Thông tin cá nhân</CardTitle>
+                  <CardDescription>Cập nhật thông tin cá nhân</CardDescription>
                 </CardHeader>
 
                 <Form {...profileForm}>
@@ -231,7 +229,7 @@ export function ProfilePage() {
                         name="tennv"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Full Name</FormLabel>
+                            <FormLabel>Tên đầy đủ</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -259,7 +257,7 @@ export function ProfilePage() {
                         name="sdt"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Phone Number</FormLabel>
+                            <FormLabel>Số điện thoại</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -273,7 +271,7 @@ export function ProfilePage() {
                         name="diachi"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Address</FormLabel>
+                            <FormLabel>Địa chỉ</FormLabel>
                             <FormControl>
                               <Input {...field} />
                             </FormControl>
@@ -287,7 +285,7 @@ export function ProfilePage() {
                         name="ngaysinh"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Date of Birth</FormLabel>
+                            <FormLabel>Ngày sinh</FormLabel>
                             <FormControl>
                               <Input type="date" {...field} />
                             </FormControl>
@@ -301,7 +299,7 @@ export function ProfilePage() {
                         name="gioitinh"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Gender</FormLabel>
+                            <FormLabel>Giới tính</FormLabel>
                             <Select
                               onValueChange={(value) =>
                                 field.onChange(Number(value))
@@ -314,8 +312,8 @@ export function ProfilePage() {
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="1">Male</SelectItem>
-                                <SelectItem value="0">Female</SelectItem>
+                                <SelectItem value="1">Nam</SelectItem>
+                                <SelectItem value="0">Nữ</SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -329,7 +327,7 @@ export function ProfilePage() {
                           name="quyen"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Role</FormLabel>
+                              <FormLabel>Quyền</FormLabel>
                               <Select
                                 onValueChange={(value) =>
                                   field.onChange(Number(value))
@@ -342,8 +340,10 @@ export function ProfilePage() {
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  <SelectItem value="0">Admin</SelectItem>
-                                  <SelectItem value="1">Staff</SelectItem>
+                                  <SelectItem value="0">
+                                    Quản trị viên
+                                  </SelectItem>
+                                  <SelectItem value="1">Nhân viên</SelectItem>
                                 </SelectContent>
                               </Select>
                               <FormMessage />
@@ -363,8 +363,8 @@ export function ProfilePage() {
                       >
                         {profileForm.formState.isSubmitting ||
                         updateProfileMutation.isPending
-                          ? 'Updating...'
-                          : 'Save Changes'}
+                          ? 'Đang cập nhật...'
+                          : 'Lưu thay đổi'}
                       </Button>
                     </CardFooter>
                   </form>
@@ -375,9 +375,9 @@ export function ProfilePage() {
             <TabsContent value="security" className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle>Change Password</CardTitle>
+                  <CardTitle>Đổi mật khẩu</CardTitle>
                   <CardDescription>
-                    Update your password to enhance account security
+                    Cập nhật mật khẩu để nâng cao bảo mật tài khoản
                   </CardDescription>
                 </CardHeader>
 
@@ -389,7 +389,7 @@ export function ProfilePage() {
                         name="matkhaucu"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Current Password</FormLabel>
+                            <FormLabel>Mật khẩu hiện tại</FormLabel>
                             <FormControl>
                               <Input type="password" {...field} />
                             </FormControl>
@@ -403,7 +403,7 @@ export function ProfilePage() {
                         name="matkhaumoi"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>New Password</FormLabel>
+                            <FormLabel>Mật khẩu mới</FormLabel>
                             <FormControl>
                               <Input type="password" {...field} />
                             </FormControl>
@@ -414,7 +414,7 @@ export function ProfilePage() {
 
                       <div className="space-y-2">
                         <Label htmlFor="confirmPassword">
-                          Confirm New Password
+                          Xác nhận mật khẩu mới
                         </Label>
                         <Input
                           id="confirmPassword"
@@ -443,8 +443,8 @@ export function ProfilePage() {
                       >
                         {passwordForm.formState.isSubmitting ||
                         changePasswordMutation.isPending
-                          ? 'Updating...'
-                          : 'Change Password'}
+                          ? 'Đang cập nhật...'
+                          : 'Đổi mật khẩu'}
                       </Button>
                     </CardFooter>
                   </form>
