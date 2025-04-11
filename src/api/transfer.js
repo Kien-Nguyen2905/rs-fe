@@ -13,8 +13,8 @@ export const transfer = {
     const response = await api.post('/transfer-contract', data);
     return response.data;
   },
-  async update(id) {
-    const response = await api.put(`/transfer-contract/delete/${id}`);
+  async delete(id) {
+    const response = await api.delete(`/transfer-contract/${id}`);
     return response.data;
   },
 };

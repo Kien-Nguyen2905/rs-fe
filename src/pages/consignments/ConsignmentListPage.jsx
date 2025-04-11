@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { useConsignmentListQuery } from '@/queries/useConsignment';
+import {
+  useConsignmentListQuery,
+  useDeleteConsignmentMutation,
+} from '@/queries/useConsignment';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ConsignmentForm } from '@/components/consignments/ConsignmentForm';
@@ -25,6 +28,14 @@ import {
 } from '@/components/ui/pagination';
 import { formatDate, formatCurrency } from '@/utils/formatters';
 import { realEstateStatus } from '@/constants/enums';
+import { toast } from 'react-toastify';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 
 const ConsignmentListPage = () => {
   const [page, setPage] = useState(1);
@@ -33,29 +44,16 @@ const ConsignmentListPage = () => {
   const [isOpenCreateForm, setIsOpenCreateForm] = useState(false);
   const [sortOrder, setSortOrder] = useState('desc');
   const [sortField, setSortField] = useState('id');
-  const limit = 10;
-
+  const limit = 8;
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [consignmentToDelete, setConsignmentToDelete] = useState(null);
   const { data, isLoading } = useConsignmentListQuery({
     page,
     limit,
   });
-
+  const { mutateAsync: deleteConsignment } = useDeleteConsignmentMutation();
   const consignments = data?.data || [];
   const totalPages = data?.totalPage || 0;
-
-  // Apply filtering based on customer name
-  useEffect(() => {
-    if (searchTerm.trim() === '') {
-      setFilteredConsignments(consignments);
-    } else {
-      const filtered = consignments.filter((consignment) =>
-        (consignment.khachhang?.hoten || '')
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()),
-      );
-      setFilteredConsignments(filtered);
-    }
-  }, [consignments, searchTerm]);
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
@@ -112,6 +110,40 @@ const ConsignmentListPage = () => {
         return 'bg-gray-100 text-gray-800';
     }
   };
+  const handleDeleteClick = (consignment) => {
+    setConsignmentToDelete(consignment);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      if (consignmentToDelete) {
+        await deleteConsignment(consignmentToDelete.kgid);
+        setDeleteDialogOpen(false);
+        setConsignmentToDelete(null);
+        toast.success('Hợp đồng đã được xóa thành công');
+      }
+    } catch (error) {
+      toast.error(
+        error.response.data.message || 'Có lỗi xảy ra khi xóa hợp đồng',
+      );
+      setDeleteDialogOpen(false);
+      setConsignmentToDelete(null);
+    }
+  };
+  // Apply filtering based on customer name
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredConsignments(consignments);
+    } else {
+      const filtered = consignments.filter((consignment) =>
+        (consignment.khachhang?.hoten || '')
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()),
+      );
+      setFilteredConsignments(filtered);
+    }
+  }, [consignments, searchTerm, deleteConsignment]);
 
   return (
     <div className="container py-4 space-y-6">
@@ -241,6 +273,13 @@ const ConsignmentListPage = () => {
                                 Xem
                               </Link>
                             </Button>
+                            <Button
+                              onClick={() => handleDeleteClick(consignment)}
+                              variant="outline"
+                              size="sm"
+                            >
+                              Xóa
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -315,6 +354,27 @@ const ConsignmentListPage = () => {
           )}
         </CardContent>
       </Card>
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Xác nhận xóa</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            Bạn có chắc chắn muốn xóa hợp đồng {consignmentToDelete?.kgid}?
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Hủy
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>
+              Xóa
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <ConsignmentForm
         open={isOpenCreateForm}

@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { toast } from 'react-toastify';
+import { handleError } from '@/utils/utils';
 
 export const DepositForm = ({ open, onOpenChange, onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,9 +45,7 @@ export const DepositForm = ({ open, onOpenChange, onClose }) => {
       form.reset();
       onClose();
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || 'Không thể tạo hợp đồng cọc',
-      );
+      handleError({ error: error, setError: form.setError });
     } finally {
       setIsSubmitting(false);
     }
@@ -56,7 +55,7 @@ export const DepositForm = ({ open, onOpenChange, onClose }) => {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Tạo hợp đồng cọc</DialogTitle>
+          <DialogTitle>Tạo hợp đồng đặt cọc</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -114,7 +113,7 @@ export const DepositForm = ({ open, onOpenChange, onClose }) => {
               name="giatri"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Giá trị cọc</FormLabel>
+                  <FormLabel>Giá trị đặt cọc</FormLabel>
                   <FormControl>
                     <Input
                       type="number"

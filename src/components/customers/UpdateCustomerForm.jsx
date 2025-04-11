@@ -29,6 +29,7 @@ import {
 import { useUpdateCustomerMutation } from '@/queries/useCustomer';
 import { useQueryClient } from '@tanstack/react-query';
 import { customerSchemaBase } from '@/schemas/customerSchema';
+import { handleError } from '@/utils/utils';
 
 const formatDateForInput = (dateString) => {
   return dateString ? new Date(dateString).toISOString().split('T')[0] : '';
@@ -97,8 +98,7 @@ export function UpdateCustomerForm({ customer, trigger, onSuccess }) {
         toast.error(result.message || 'Có lỗi xảy ra khi cập nhật khách hàng');
       }
     } catch (error) {
-      console.error('Error updating customer:', error);
-      toast.error('Có lỗi xảy ra khi cập nhật khách hàng');
+      handleError({ error: error, setError: form.setError });
     }
   };
 

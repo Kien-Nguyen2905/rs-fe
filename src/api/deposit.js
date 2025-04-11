@@ -13,6 +13,10 @@ export const deposit = {
     const response = await api.post('/deposit-contract', data);
     return response.data;
   },
+  async delete(id) {
+    const response = await api.delete(`/deposit-contract/${id}`);
+    return response.data;
+  },
   async update(id) {
     const response = await api.put(`/deposit-contract/cancel/${id}`);
     return response.data;

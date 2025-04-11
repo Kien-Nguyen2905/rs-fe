@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { useTransferListQuery } from '@/queries/useTransfer';
+import {
+  useTransferListQuery,
+  useDeleteTransferMutation,
+} from '@/queries/useTransfer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { TransferForm } from '@/components/transfers/TransferForm';
-import { Search, ArrowUpDown, User } from 'lucide-react';
+import { ArrowUpDown, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   Table,
@@ -17,13 +20,20 @@ import {
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { formatDate, formatCurrency } from '@/utils/formatters';
+import { toast } from 'react-toastify';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 
 const TransferListPage = () => {
   const [page, setPage] = useState(1);
@@ -32,9 +42,12 @@ const TransferListPage = () => {
   const [isOpenCreateForm, setIsOpenCreateForm] = useState(false);
   const [sortOrder, setSortOrder] = useState('desc');
   const [sortField, setSortField] = useState('cnid');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [transferToDelete, setTransferToDelete] = useState(null);
   const limit = 10;
 
   const { data, isLoading } = useTransferListQuery();
+  const { mutateAsync: deleteTransfer } = useDeleteTransferMutation();
 
   const transfers = data?.data || [];
   const totalPages = Math.ceil(transfers.length / limit);
@@ -83,6 +96,28 @@ const TransferListPage = () => {
   const startIndex = (page - 1) * limit;
   const endIndex = startIndex + limit;
   const paginatedTransfers = sortedTransfers.slice(startIndex, endIndex);
+
+  const handleDeleteClick = (transfer) => {
+    setTransferToDelete(transfer);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      if (transferToDelete) {
+        await deleteTransfer(transferToDelete.cnid);
+        setDeleteDialogOpen(false);
+        setTransferToDelete(null);
+        toast.success('Hợp đồng đã được xóa thành công');
+      }
+    } catch (error) {
+      toast.error(
+        error.response.data.message || 'Có lỗi xảy ra khi xóa hợp đồng',
+      );
+      setDeleteDialogOpen(false);
+      setTransferToDelete(null);
+    }
+  };
 
   return (
     <div className="container py-4 space-y-6">
@@ -162,7 +197,7 @@ const TransferListPage = () => {
                   {paginatedTransfers.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} className="h-24 text-center">
-                        No transfers found.
+                        Không có hợp đồng nào
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -192,6 +227,13 @@ const TransferListPage = () => {
                               <Link to={`/transfers/${transfer.cnid}`}>
                                 Xem
                               </Link>
+                            </Button>
+                            <Button
+                              onClick={() => handleDeleteClick(transfer)}
+                              variant="outline"
+                              size="sm"
+                            >
+                              Xóa
                             </Button>
                           </div>
                         </TableCell>
@@ -244,6 +286,28 @@ const TransferListPage = () => {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Xác nhận xóa</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            Bạn có chắc chắn muốn xóa hợp đồng {transferToDelete?.cnid}?
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Hủy
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>
+              Xóa
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {isOpenCreateForm && (
         <TransferForm

@@ -37,3 +37,13 @@ export const useCancelDepositMutation = () => {
     },
   });
 };
+export const useDeleteDepositMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => deposit.delete(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['depositList'] });
+      queryClient.invalidateQueries({ queryKey: ['depositById', id] });
+    },
+  });
+};

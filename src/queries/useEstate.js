@@ -46,3 +46,14 @@ export const useUpdateEstateMutation = () => {
     },
   });
 };
+export const useDeleteEstateMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => estate.deleteEstate(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['estateList'],
+      });
+    },
+  });
+};

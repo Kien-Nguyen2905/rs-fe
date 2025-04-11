@@ -20,6 +20,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { toast } from 'react-toastify';
+import { handleError } from '@/utils/utils';
 
 export const ConsignmentForm = ({ open, onOpenChange, onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,9 +47,7 @@ export const ConsignmentForm = ({ open, onOpenChange, onClose }) => {
       form.reset();
       onClose();
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || 'Không thể tạo hợp đồng bán hàng',
-      );
+      handleError({ error: error, setError: form.setError });
     } finally {
       setIsSubmitting(false);
     }

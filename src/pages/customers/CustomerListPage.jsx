@@ -180,9 +180,9 @@ export default function CustomerListPage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex space-x-2">
-                            <Button variant="outline" size="icon" asChild>
+                            <Button variant="outline" size="sm" asChild>
                               <Link to={`/customers/${customer.khid}`}>
-                                <Eye className="w-4 h-4" />
+                                Xem
                               </Link>
                             </Button>
                             <UpdateCustomerForm

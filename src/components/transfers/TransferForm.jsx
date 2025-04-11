@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { toast } from 'react-toastify';
+import { handleError } from '@/utils/utils';
 
 export const TransferForm = ({ isOpen, onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,7 +43,7 @@ export const TransferForm = ({ isOpen, onClose }) => {
       toast.success('Hợp đồng chuyển nhượng đã được tạo thành công');
       onClose();
     } catch (error) {
-      toast.error(error.message || 'Không thể tạo hợp đồng chuyển nhượng');
+      handleError({ error: error, setError: form.setError });
     } finally {
       setIsSubmitting(false);
     }

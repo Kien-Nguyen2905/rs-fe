@@ -12,7 +12,11 @@ import { Button } from '@/components/ui/button';
 import { PlusIcon, SearchIcon, ArrowUpDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
-import { useEstateQuery, useTypeEstateQuery } from '@/queries/useEstate';
+import {
+  useDeleteEstateMutation,
+  useEstateQuery,
+  useTypeEstateQuery,
+} from '@/queries/useEstate';
 import PropertyForm from '@/components/properties/PropertyForm';
 import { UpdatePropertyForm } from '@/components/properties/UpdatePropertyForm';
 import {
@@ -32,6 +36,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { toast } from 'react-toastify';
 
 export function PropertyListPage() {
   const [page, setPage] = useState(1);
@@ -40,7 +52,9 @@ export function PropertyListPage() {
   const [sortOrder, setSortOrder] = useState('desc');
   const [sortField, setSortField] = useState('bdsid');
   const [statusFilter, setStatusFilter] = useState('all');
-  const limit = 10;
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [propertyToDelete, setPropertyToDelete] = useState(null);
+  const limit = 8;
 
   const { data: estateResponse, isLoading, error } = useEstateQuery();
   const { data: estateTypeList } = useTypeEstateQuery();
@@ -49,6 +63,7 @@ export function PropertyListPage() {
   const totalProperties = properties.length;
   const totalPages = Math.ceil(totalProperties / limit);
 
+  const { mutateAsync: deleteEstate } = useDeleteEstateMutation();
   // Apply filtering when properties, searchQuery, or statusFilter changes
   useEffect(() => {
     let filtered = [...properties];
@@ -152,6 +167,28 @@ export function PropertyListPage() {
       (type) => type.loaiid === loaiid,
     );
     return propertyType?.tenloai || 'Không xác định';
+  };
+
+  const handleDeleteClick = (property) => {
+    setPropertyToDelete(property);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      if (propertyToDelete) {
+        await deleteEstate(propertyToDelete.bdsid);
+        setDeleteDialogOpen(false);
+        setPropertyToDelete(null);
+        toast.success('Bất động sản đã được xóa thành công');
+      }
+    } catch (error) {
+      toast.error(
+        error.response.data.message || 'Có lỗi xảy ra khi xóa bất động sản',
+      );
+      setDeleteDialogOpen(false);
+      setPropertyToDelete(null);
+    }
   };
 
   return (
@@ -333,10 +370,17 @@ export function PropertyListPage() {
                                 Xem
                               </Button>
                             </Link>
+                            <Button
+                              onClick={() => handleDeleteClick(property)}
+                              variant="outline"
+                              size="sm"
+                            >
+                              Xóa
+                            </Button>
                             <UpdatePropertyForm
                               propertyId={property.bdsid}
                               trigger={
-                                <Button variant="outline" size="sm">
+                                <Button variant="ghost" size="sm">
                                   Sửa
                                 </Button>
                               }
@@ -420,6 +464,27 @@ export function PropertyListPage() {
           )}
         </CardContent>
       </Card>
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Xác nhận xóa</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            Bạn có chắc chắn muốn xóa bất động sản {propertyToDelete?.masoqsdd}?
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Hủy
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>
+              Xóa
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

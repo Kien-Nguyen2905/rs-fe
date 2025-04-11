@@ -17,6 +17,10 @@ export const estate = {
     const response = await api.post('/real-estate', data);
     return response.data;
   },
+  async deleteEstate(id) {
+    const response = await api.delete(`/real-estate/${id}`);
+    return response.data;
+  },
   async updateEstate(id, data) {
     const response = await api.put(`/real-estate/${id}`, data);
     return response.data;

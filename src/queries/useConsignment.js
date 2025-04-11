@@ -38,3 +38,15 @@ export const useUpdateConsignmentMutation = () => {
     },
   });
 };
+
+export const useDeleteConsignmentMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id) => consignment.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['consignmentList'],
+      });
+    },
+  });
+};

@@ -13,6 +13,10 @@ export const consignment = {
     const response = await api.post('/consignment-contract', data);
     return response.data;
   },
+  async delete(id) {
+    const response = await api.delete(`/consignment-contract/${id}`);
+    return response.data;
+  },
   async update(id) {
     const response = await api.put(`/consignment-contract/cancel/${id}`);
     return response.data;

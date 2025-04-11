@@ -27,10 +27,10 @@ export const useCreateTransferMutation = () => {
   });
 };
 
-export const useCancelTransferMutation = () => {
+export const useDeleteTransferMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id) => transfer.update(id),
+    mutationFn: (id) => transfer.delete(id),
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ['transferList'] });
       queryClient.invalidateQueries({ queryKey: ['transferById', id] });

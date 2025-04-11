@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { useDepositListQuery } from '@/queries/useDeposit'; // Use deposit query
+import {
+  useDepositListQuery,
+  useDeleteDepositMutation,
+} from '@/queries/useDeposit'; // Use deposit query
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { DepositForm } from '@/components/deposits/DepositForm'; // Use deposit form
@@ -25,6 +28,14 @@ import {
 } from '@/components/ui/pagination';
 import { formatDate, formatCurrency } from '@/utils/formatters';
 import { depositContractStatus } from '@/constants/enums';
+import { toast } from 'react-toastify';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
 // Removed realEstateStatus import as deposit status logic might differ
 
 const DepositListPage = () => {
@@ -34,6 +45,8 @@ const DepositListPage = () => {
   const [isOpenCreateForm, setIsOpenCreateForm] = useState(false);
   const [sortOrder, setSortOrder] = useState('desc');
   const [sortField, setSortField] = useState('dcid'); // Default sort by deposit ID
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [depositToDelete, setDepositToDelete] = useState(null);
   const limit = 10;
 
   const { data, isLoading } = useDepositListQuery({
@@ -42,6 +55,7 @@ const DepositListPage = () => {
     limit,
     // Add other potential query params like sort, filter if supported by API
   });
+  const { mutateAsync: deleteDeposit } = useDeleteDepositMutation();
 
   const deposits = data?.data || [];
   const totalPages = data?.totalPage || 0;
@@ -130,6 +144,28 @@ const DepositListPage = () => {
         return 'bg-blue-100 text-blue-800';
       default:
         return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const handleDeleteClick = (deposit) => {
+    setDepositToDelete(deposit);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      if (depositToDelete) {
+        await deleteDeposit(depositToDelete.dcid);
+        setDeleteDialogOpen(false);
+        setDepositToDelete(null);
+        toast.success('Hợp đồng đã được xóa thành công');
+      }
+    } catch (error) {
+      toast.error(
+        error.response.data.message || 'Có lỗi xảy ra khi xóa hợp đồng',
+      );
+      setDeleteDialogOpen(false);
+      setDepositToDelete(null);
     }
   };
 
@@ -278,9 +314,18 @@ const DepositListPage = () => {
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="outline" size="sm" asChild>
-                            <Link to={`/deposits/${deposit.dcid}`}>Xem</Link>
-                          </Button>
+                          <div className="flex justify-end space-x-2">
+                            <Button variant="outline" size="sm" asChild>
+                              <Link to={`/deposits/${deposit.dcid}`}>Xem</Link>
+                            </Button>
+                            <Button
+                              onClick={() => handleDeleteClick(deposit)}
+                              variant="outline"
+                              size="sm"
+                            >
+                              Xóa
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
@@ -356,6 +401,28 @@ const DepositListPage = () => {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Xác nhận xóa</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            Bạn có chắc chắn muốn xóa hợp đồng {depositToDelete?.dcid}?
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Hủy
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmDelete}>
+              Xóa
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Deposit creation form dialog */}
       <DepositForm

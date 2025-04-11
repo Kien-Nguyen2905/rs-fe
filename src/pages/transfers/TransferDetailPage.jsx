@@ -2,26 +2,26 @@ import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   useTransferByIdQuery,
-  useCancelTransferMutation,
+  // useDeleteTransferMutation,
 } from '@/queries/useTransfer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDate, formatCurrency } from '@/utils/formatters';
-import { toast } from 'react-toastify';
+// import { toast } from 'react-toastify';
 
 const TransferDetailPage = () => {
   const { id } = useParams();
   const { data, isLoading } = useTransferByIdQuery(id);
   const transfer = data?.data;
-  const cancelTransferMutation = useCancelTransferMutation();
+  // const { mutateAsync: deleteTransfer } = useDeleteTransferMutation();
 
-  const handleCancelTransfer = async () => {
-    try {
-      await cancelTransferMutation.mutateAsync(id);
-      toast.success('Transfer contract has been cancelled');
-    } catch (error) {
-      toast.error(error.message || 'Failed to cancel transfer');
-    }
-  };
+  // const handleCancelTransfer = async () => {
+  //   try {
+  //     await deleteTransfer.mutateAsync(id);
+  //     toast.success('Hợp đồng đã được xóa thành công');
+  //   } catch (error) {
+  //     toast.error(error.message || 'Có lỗi xảy ra khi xóa hợp đồng');
+  //   }
+  // };
 
   if (isLoading) {
     return <div className="flex justify-center p-8">Đang tải...</div>;
@@ -37,13 +37,13 @@ const TransferDetailPage = () => {
     <div className="container py-4">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Hợp đồng chuyển nhượng chi tiết</h1>
-        <Button
+        {/* <Button
           variant="destructive"
           onClick={handleCancelTransfer}
           disabled={transfer.trangthai !== 0 && transfer.trangthai !== 1}
         >
           Xoá hợp đồng
-        </Button>
+        </Button> */}
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
