@@ -9,9 +9,13 @@ import { formatDate, formatCurrency } from '@/utils/formatters';
 import { realEstateStatus } from '@/constants/enums';
 import { toast } from 'react-toastify';
 import { useTypeEstateQuery } from '@/queries/useEstate';
+import { useState } from 'react';
+import { PlusIcon } from 'lucide-react';
+import { DepositForm } from '@/components/deposits/DepositForm';
 
 const ConsignmentDetailPage = () => {
   const { id } = useParams();
+  const [showDepositForm, setShowDepositForm] = useState(false);
   const { data, isLoading } = useConsignmentByIdQuery(id);
   const consignment = data?.data;
   const updateConsignmentMutation = useUpdateConsignmentMutation();
@@ -54,13 +58,21 @@ const ConsignmentDetailPage = () => {
     <div className="container py-4">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Hợp đồng ký gửi chi tiết</h1>
-        <Button
-          variant="destructive"
-          onClick={handleCancelConsignment}
-          disabled={consignment.trangthai === realEstateStatus.EXPIRED}
-        >
-          Hủy hợp đồng
-        </Button>
+        <div className="flex gap-2">
+          {consignment.trangthai === realEstateStatus.ACTIVE && (
+            <Button onClick={() => setShowDepositForm(true)}>
+              <PlusIcon className="w-4 h-4 mr-2" />
+              Tạo cọc
+            </Button>
+          )}
+          <Button
+            variant="destructive"
+            onClick={handleCancelConsignment}
+            disabled={consignment.trangthai === realEstateStatus.EXPIRED}
+          >
+            Hủy hợp đồng
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -209,6 +221,13 @@ const ConsignmentDetailPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      <DepositForm
+        propertyId={consignment?.batdongsan?.bdsid}
+        open={showDepositForm}
+        onClose={() => setShowDepositForm(false)}
+        onOpenChange={() => setShowDepositForm(false)}
+      />
     </div>
   );
 };

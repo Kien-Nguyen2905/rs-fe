@@ -23,7 +23,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'react-toastify';
 import { handleError } from '@/utils/utils';
 
-export const TransferForm = ({ isOpen, onClose }) => {
+export const TransferForm = ({ isOpen, onClose, depositId }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const createTransferMutation = useCreateTransferMutation();
 
@@ -31,7 +31,7 @@ export const TransferForm = ({ isOpen, onClose }) => {
   const form = useForm({
     resolver: zodResolver(transferContractSchema),
     defaultValues: {
-      dcid: '',
+      dcid: depositId | '',
       giatri: '',
     },
   });
@@ -65,6 +65,7 @@ export const TransferForm = ({ isOpen, onClose }) => {
                   <FormLabel>Mã hợp đồng cọc</FormLabel>
                   <FormControl>
                     <Input
+                      disabled={depositId}
                       type="number"
                       placeholder="Nhập mã hợp đồng cọc"
                       {...field}

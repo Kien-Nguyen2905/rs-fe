@@ -8,15 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDate, formatCurrency } from '@/utils/formatters';
 import { toast } from 'react-toastify';
 import { useTypeEstateQuery } from '@/queries/useEstate';
-
-// Define deposit status constants
-const depositStatus = {
-  EXPIRED: 0,
-  ACTIVE: 1,
-};
+import { depositContractStatus } from '@/constants/enums';
+import { useState } from 'react';
+import { PlusIcon } from 'lucide-react';
+import { TransferForm } from '@/components/transfers/TransferForm';
 
 const DepositDetailPage = () => {
   const { id } = useParams();
+  const [showTransferForm, setShowTransferForm] = useState(false);
   const { data, isLoading } = useDepositByIdQuery(id);
   const deposit = data?.data;
   const cancelDepositMutation = useCancelDepositMutation();
@@ -43,26 +42,35 @@ const DepositDetailPage = () => {
 
   const getStatusText = (status) => {
     switch (status) {
-      case depositStatus.ACTIVE:
-        return 'Active';
-      case depositStatus.EXPIRED:
-        return 'Expired';
+      case depositContractStatus.CANCELED:
+        return 'Canceled'; // Or 'Active' if 0 means active
+      case depositContractStatus.DEPOSITED:
+        return 'Deposited';
+      case depositContractStatus.COMPLETED:
+        return 'Completed'; // Or 'Sold'
       default:
         return 'Unknown';
     }
   };
-
   return (
     <div className="container py-4">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Hợp đồng đặt cọc chi tiết</h1>
-        <Button
-          variant="destructive"
-          onClick={handleCancelDeposit}
-          disabled={deposit.tinhtrang === depositStatus.EXPIRED}
-        >
-          Huỷ hợp đồng
-        </Button>
+        <div className="flex gap-2">
+          {deposit.tinhtrang === depositContractStatus.DEPOSITED && (
+            <Button onClick={() => setShowTransferForm(true)}>
+              <PlusIcon className="w-4 h-4 mr-2" />
+              Tạo chuyển nhượng
+            </Button>
+          )}
+          <Button
+            variant="destructive"
+            onClick={handleCancelDeposit}
+            disabled={deposit.tinhtrang === depositContractStatus.COMPLETED}
+          >
+            Huỷ hợp đồng
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -199,6 +207,12 @@ const DepositDetailPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      <TransferForm
+        depositId={deposit?.dcid}
+        isOpen={showTransferForm}
+        onClose={() => setShowTransferForm(false)}
+      />
     </div>
   );
 };

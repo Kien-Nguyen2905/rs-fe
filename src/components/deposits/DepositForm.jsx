@@ -22,7 +22,7 @@ import {
 import { toast } from 'react-toastify';
 import { handleError } from '@/utils/utils';
 
-export const DepositForm = ({ open, onOpenChange, onClose }) => {
+export const DepositForm = ({ open, onOpenChange, onClose, propertyId }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const createDepositMutation = useCreateDepositMutation(); // Use deposit mutation hook
 
@@ -30,7 +30,7 @@ export const DepositForm = ({ open, onOpenChange, onClose }) => {
     resolver: zodResolver(depositContractSchema), // Use deposit schema resolver
     defaultValues: {
       khid: '',
-      bdsid: '',
+      bdsid: propertyId | '',
       giatri: '',
       ngayhethan: '', // Changed from ngayketthuc
       // Removed chiphidv, ngaybatdau, trangthai as they are not in deposit schema
@@ -93,6 +93,7 @@ export const DepositForm = ({ open, onOpenChange, onClose }) => {
                   <FormLabel>Mã bất động sản</FormLabel>
                   <FormControl>
                     <Input
+                      disabled={propertyId}
                       type="number"
                       placeholder="Nhập mã bất động sản"
                       {...field}

@@ -22,15 +22,21 @@ import {
 import { toast } from 'react-toastify';
 import { handleError } from '@/utils/utils';
 
-export const ConsignmentForm = ({ open, onOpenChange, onClose }) => {
+export const ConsignmentForm = ({
+  open,
+  onOpenChange,
+  onClose,
+  propertyId,
+  customerId,
+}) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const createConsignmentMutation = useCreateConsignmentMutation();
 
   const form = useForm({
     resolver: zodResolver(csmContractSchema),
     defaultValues: {
-      khid: '',
-      bdsid: '',
+      khid: customerId | '',
+      bdsid: propertyId | '',
       giatri: '',
       chiphidv: '',
       ngaybatdau: '',
@@ -72,6 +78,7 @@ export const ConsignmentForm = ({ open, onOpenChange, onClose }) => {
                   <FormLabel>Mã khách hàng</FormLabel>
                   <FormControl>
                     <Input
+                      disabled={customerId}
                       type="number"
                       placeholder="Nhập mã khách hàng"
                       {...field}
@@ -91,6 +98,7 @@ export const ConsignmentForm = ({ open, onOpenChange, onClose }) => {
                   <FormLabel>Mã bất động sản</FormLabel>
                   <FormControl>
                     <Input
+                      disabled={propertyId}
                       type="number"
                       placeholder="Nhập mã bất động sản"
                       {...field}

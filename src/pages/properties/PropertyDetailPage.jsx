@@ -8,15 +8,18 @@ import {
   MapPinIcon,
   RulerIcon,
   BarChart,
+  PlusIcon,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useGetCustomerByIdQuery } from '@/queries/useCustomer';
 import { useEstateByIdQuery, useTypeEstateQuery } from '@/queries/useEstate';
 import { realEstateStatus } from '@/constants/enums';
+import { ConsignmentForm } from '@/components/consignments/ConsignmentForm';
 
 export function PropertyDetailPage() {
   const { id } = useParams();
   const [error, setError] = useState(null);
+  const [showConsignmentForm, setShowConsignmentForm] = useState(false);
   const { data: estateTypeList } = useTypeEstateQuery();
   const {
     data: response,
@@ -264,6 +267,15 @@ export function PropertyDetailPage() {
                 {(property.dongia / property.dientich).toLocaleString('vi-VN')}{' '}
                 VND/m²
               </p>
+              {getStatusText(property.tinhtrang) === 'Expired' && (
+                <Button
+                  className="w-full mt-4"
+                  onClick={() => setShowConsignmentForm(true)}
+                >
+                  <PlusIcon className="w-4 h-4 mr-2" />
+                  Tạo ký gửi
+                </Button>
+              )}
             </CardContent>
           </Card>
 
@@ -277,6 +289,14 @@ export function PropertyDetailPage() {
           </Card>
         </div>
       </div>
+
+      <ConsignmentForm
+        customerId={property.khid}
+        propertyId={id}
+        open={showConsignmentForm}
+        onClose={() => setShowConsignmentForm(false)}
+        onOpenChange={() => setShowConsignmentForm(false)}
+      />
     </div>
   );
 }
